@@ -1,0 +1,111 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import BlogCard from '@components/blog/BlogCard.astro';
+import ReadingTime from '@components/blog/ReadingTime.astro';
+import TableOfContents from '@components/blog/TableOfContents.astro';
+import Tag from '@components/ui/Tag.astro';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { formatDate } from '@utils/formatDate';
+import { getRelatedPosts } from '@utils/getRelatedPosts';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => (import.meta.env.PROD ? !data.draft : true));
+
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props as Props;
+const { Content, headings } = await post.render();
+const posts = await getCollection('blog', ({ data }) => (import.meta.env.PROD ? !data.draft : true));
+const relatedPosts = getRelatedPosts(post, posts);
+
+const heroForSchema = post.data.heroImage
+  ? new URL(post.data.heroImage.src, Astro.site).toString()
+  : new URL('/images/default-og.svg', Astro.site).toString();
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.data.title,
+  description: post.data.description,
+  image: [heroForSchema],
+  datePublished: post.data.pubDate.toISOString(),
+  dateModified: (post.data.updatedDate ?? post.data.pubDate).toISOString(),
+  author: [
+    {
+      '@type': 'Person',
+      name: 'Signal & Sprocket',
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title={`${post.data.title} | Signal & Sprocket`}
+  description={post.data.description}
+  image={post.data.heroImage}
+  type="article"
+  publishedTime={post.data.pubDate}
+  modifiedTime={post.data.updatedDate}
+  tags={post.data.tags}
+>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
+
+  <article class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_260px]">
+    <div>
+      <header class="card-surface mb-8 overflow-hidden">
+        {post.data.heroImage && (
+          <Image
+            src={post.data.heroImage}
+            alt={post.data.title}
+            width={1200}
+            height={630}
+            class="h-64 w-full object-cover sm:h-80"
+          />
+        )}
+
+        <div class="space-y-5 p-6 sm:p-8">
+          <div class="flex flex-wrap items-center gap-3 text-sm opacity-75">
+            <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+            {post.data.updatedDate && <span>更新: {formatDate(post.data.updatedDate)}</span>}
+            <ReadingTime content={post.body} />
+          </div>
+          <h1 class="text-4xl leading-tight sm:text-5xl">{post.data.title}</h1>
+          <p class="text-sm leading-7 opacity-85 sm:text-base">{post.data.description}</p>
+          <div class="flex flex-wrap gap-2">
+            {post.data.tags.map((tag) => <Tag name={tag} />)}
+          </div>
+        </div>
+      </header>
+
+      <div class="card-surface p-6 sm:p-8">
+        <div class="prose prose-slate dark:prose-invert">
+          <Content />
+        </div>
+      </div>
+
+      {relatedPosts.length > 0 && (
+        <section class="mt-10">
+          <h2 class="mb-5 text-3xl">関連記事</h2>
+          <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {relatedPosts.map((relatedPost) => <BlogCard post={relatedPost} />)}
+          </div>
+        </section>
+      )}
+    </div>
+
+    <aside class="hidden lg:block">
+      <div class="sticky top-24">
+        <TableOfContents headings={headings} />
+      </div>
+    </aside>
+  </article>
+</BaseLayout>

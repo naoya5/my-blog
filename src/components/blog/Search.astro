@@ -1,0 +1,26 @@
+<div class="card-surface p-4">
+  <h2 class="mb-3 text-lg font-bold">検索</h2>
+  <div id="search"></div>
+</div>
+
+<link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
+<script src="/pagefind/pagefind-ui.js" is:inline></script>
+<script is:inline>
+  function mountPagefind() {
+    const host = document.querySelector('#search');
+    if (!host || host.getAttribute('data-bound') === '1' || !window.PagefindUI) return;
+
+    host.setAttribute('data-bound', '1');
+    new window.PagefindUI({
+      element: '#search',
+      showSubResults: true,
+      showImages: false,
+      translations: {
+        placeholder: 'キーワードで記事検索',
+      },
+    });
+  }
+
+  mountPagefind();
+  document.addEventListener('astro:after-swap', mountPagefind);
+</script>

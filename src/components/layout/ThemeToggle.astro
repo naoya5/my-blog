@@ -1,0 +1,50 @@
+---
+---
+
+<button
+  id="theme-toggle"
+  type="button"
+  class="btn-outline h-10 w-10 rounded-full p-0"
+  aria-label="テーマ切替"
+  title="テーマ切替"
+>
+  <span data-theme-icon="light" class="hidden">☀</span>
+  <span data-theme-icon="dark" class="hidden">☾</span>
+</button>
+
+<script is:inline>
+  const THEME_KEY = 'theme';
+
+  function preferredTheme() {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === 'light' || saved === 'dark') return saved;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  function applyTheme(theme) {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    const lightIcon = document.querySelector('[data-theme-icon="light"]');
+    const darkIcon = document.querySelector('[data-theme-icon="dark"]');
+    if (lightIcon && darkIcon) {
+      lightIcon.classList.toggle('hidden', theme !== 'light');
+      darkIcon.classList.toggle('hidden', theme !== 'dark');
+    }
+  }
+
+  function mountToggle() {
+    const button = document.getElementById('theme-toggle');
+    if (!button || button.dataset.bound === '1') return;
+
+    button.dataset.bound = '1';
+    applyTheme(preferredTheme());
+
+    button.addEventListener('click', () => {
+      const next = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+      localStorage.setItem(THEME_KEY, next);
+      applyTheme(next);
+    });
+  }
+
+  mountToggle();
+  document.addEventListener('astro:after-swap', mountToggle);
+</script>

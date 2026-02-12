@@ -1,0 +1,14 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="80" y1="60" x2="1120" y2="570" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#062E3B" />
+      <stop offset="1" stop-color="#0A1D27" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)" />
+  <circle cx="214" cy="130" r="180" fill="#34D399" fill-opacity="0.35" />
+  <circle cx="1010" cy="88" r="210" fill="#22D3EE" fill-opacity="0.3" />
+  <rect x="82" y="116" width="1036" height="398" rx="28" fill="#0E2732" fill-opacity="0.92" stroke="#5EEAD4" stroke-opacity="0.4" />
+  <text x="132" y="256" fill="#DCFCE7" font-size="60" font-family="Georgia, serif" font-weight="700">Signal &amp; Sprocket</text>
+  <text x="132" y="330" fill="#B6E0EA" font-size="34" font-family="'Hiragino Sans', sans-serif">Astroで構築する、静的で速い技術ブログ</text>
+</svg>

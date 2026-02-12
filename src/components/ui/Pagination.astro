@@ -1,0 +1,16 @@
+---
+interface Props {
+  currentPage: number;
+  lastPage: number;
+  prevUrl?: string;
+  nextUrl?: string;
+}
+
+const { currentPage, lastPage, prevUrl, nextUrl } = Astro.props;
+---
+
+<nav class="mt-12 flex items-center justify-center gap-4" aria-label="ページネーション">
+  {prevUrl ? <a class="btn-outline" href={prevUrl}>前へ</a> : <span class="btn-outline opacity-50">前へ</span>}
+  <span class="text-sm">{currentPage} / {lastPage}</span>
+  {nextUrl ? <a class="btn-outline" href={nextUrl}>次へ</a> : <span class="btn-outline opacity-50">次へ</span>}
+</nav>

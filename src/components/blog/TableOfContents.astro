@@ -1,0 +1,31 @@
+---
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: Heading[];
+}
+
+const { headings } = Astro.props;
+const visibleHeadings = headings.filter((heading) => heading.depth >= 2 && heading.depth <= 3);
+---
+
+{
+  visibleHeadings.length > 0 && (
+    <nav class="card-surface p-4" aria-label="目次">
+      <h2 class="mb-3 text-lg font-bold">目次</h2>
+      <ul class="space-y-2">
+        {visibleHeadings.map((heading) => (
+          <li class={heading.depth === 3 ? 'ml-4 text-sm opacity-85' : 'text-sm'}>
+            <a href={`#${heading.slug}`} class="hover:opacity-100 opacity-80 transition-opacity">
+              {heading.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}

@@ -1,0 +1,3 @@
+- Astro 5.x setup requires specific integration versions for Tailwind and Sitemap.
+- Configuration files like astro.config.mjs and tailwind.config.cjs should be provided in full to ensure consistency.
+- Directory structure creation is a crucial step for project organization.

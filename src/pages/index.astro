@@ -1,0 +1,42 @@
+---
+import BlogCard from '@components/blog/BlogCard.astro';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { getSortedPosts } from '@utils/getSortedPosts';
+
+const posts = await getSortedPosts();
+const latestPosts = posts.slice(0, 3);
+---
+
+<BaseLayout
+  title="Signal & Sprocket | Astro製の技術ブログ"
+  description="Content Collectionsと静的配信を中心に、Astroで速いブログを構築するためのメモを公開しています。"
+>
+  <section class="card-surface relative overflow-hidden p-8 sm:p-12">
+    <div class="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-emerald-500/20 blur-3xl"></div>
+    <div class="absolute -bottom-16 -left-16 h-52 w-52 rounded-full bg-cyan-500/25 blur-3xl"></div>
+
+    <p class="text-xs uppercase tracking-[0.24em] opacity-70">Engineering Notebook</p>
+    <h1 class="mt-4 max-w-3xl text-4xl leading-tight sm:text-5xl">
+      速く、壊れにくく、運用しやすい
+      <br />Astroブログの実装記録
+    </h1>
+    <p class="mt-6 max-w-2xl text-sm leading-7 opacity-85 sm:text-base">
+      このサイトは `docs/` にある要件に沿って構築した実装サンプルです。Content Collections、Markdown拡張、検索、RSS、SEOの土台を揃えています。
+    </p>
+    <div class="mt-8 flex flex-wrap gap-3">
+      <a href="/blog/" class="btn-outline">記事一覧へ</a>
+      <a href="/rss.xml" class="btn-outline">RSSを購読</a>
+    </div>
+  </section>
+
+  <section class="mt-12">
+    <div class="mb-6 flex items-end justify-between gap-4">
+      <h2 class="text-3xl">最新記事</h2>
+      <a class="text-sm opacity-80 hover:opacity-100" href="/blog/">すべて見る</a>
+    </div>
+
+    <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+      {latestPosts.map((post) => <BlogCard post={post} />)}
+    </div>
+  </section>
+</BaseLayout>

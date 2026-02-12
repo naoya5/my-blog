@@ -1,0 +1,17 @@
+---
+import readingTime from 'reading-time';
+
+interface Props {
+  content: string;
+}
+
+const { content } = Astro.props;
+const minutes = Math.max(1, Math.ceil(readingTime(content).minutes));
+---
+
+<span class="inline-flex items-center gap-1 text-sm opacity-70" aria-label={`推定${minutes}分で読めます`}>
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+  {minutes} 分で読めます
+</span>

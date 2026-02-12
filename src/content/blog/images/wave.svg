@@ -1,0 +1,8 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#112031" />
+  <path d="M0 440C130 330 256 316 388 380C520 444 646 428 782 350C918 272 1046 270 1200 350V630H0V440Z" fill="#0EA5E9" fill-opacity="0.35" />
+  <path d="M0 500C125 420 266 412 392 458C518 504 660 496 790 430C920 364 1050 362 1200 420V630H0V500Z" fill="#14B8A6" fill-opacity="0.35" />
+  <rect x="96" y="120" width="1008" height="360" rx="30" fill="#0A1A29" stroke="#67E8F9" stroke-opacity="0.4" />
+  <text x="146" y="268" fill="#E0F2FE" font-size="58" font-family="Georgia, serif" font-weight="700">Search &amp; Performance</text>
+  <text x="146" y="338" fill="#A5F3FC" font-size="30" font-family="'Hiragino Sans', sans-serif">Pagefind + SSG</text>
+</svg>
