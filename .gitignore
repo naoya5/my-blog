@@ -25,6 +25,9 @@ pnpm-debug.log*
 
 # sisyphus
 .sisyphus/
+.sysyphus/
 
 # playwright output
 output/
+
+docs/
