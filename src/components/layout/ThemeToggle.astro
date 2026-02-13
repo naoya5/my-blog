@@ -4,12 +4,44 @@
 <button
   id="theme-toggle"
   type="button"
-  class="btn-outline h-10 w-10 rounded-full p-0"
+  class="group relative h-10 w-10 overflow-hidden rounded-xl bg-slate-100 transition-all hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700"
   aria-label="テーマ切替"
   title="テーマ切替"
 >
-  <span data-theme-icon="light" class="hidden">☀</span>
-  <span data-theme-icon="dark" class="hidden">☾</span>
+  <div class="relative h-full w-full">
+    <!-- Sun Icon -->
+    <svg
+      data-theme-icon="light"
+      class="absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 transition-all duration-500 hidden"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      stroke-width="2"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"
+      />
+    </svg>
+    <!-- Moon Icon -->
+    <svg
+      data-theme-icon="dark"
+      class="absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 transition-all duration-500 hidden"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      stroke-width="2"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+      />
+    </svg>
+  </div>
 </button>
 
 <script is:inline>
@@ -28,6 +60,13 @@
     if (lightIcon && darkIcon) {
       lightIcon.classList.toggle('hidden', theme !== 'light');
       darkIcon.classList.toggle('hidden', theme !== 'dark');
+      
+      // Add a little spin animation
+      const targetIcon = theme === 'light' ? lightIcon : darkIcon;
+      targetIcon.animate([
+        { transform: 'translate(-50%, -50%) rotate(-90deg)', opacity: 0 },
+        { transform: 'translate(-50%, -50%) rotate(0)', opacity: 1 }
+      ], { duration: 300, easing: 'ease-out' });
     }
   }
 

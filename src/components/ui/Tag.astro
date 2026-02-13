@@ -6,4 +6,11 @@ interface Props {
 const { name } = Astro.props;
 ---
 
-<a class="chip" href={`/blog/tag/${encodeURIComponent(name)}/`}>#{name}</a>
+<a 
+  class="chip group relative overflow-hidden" 
+  href={`/blog/tag/${encodeURIComponent(name)}/`}
+>
+  <span class="relative z-10 transition-colors group-hover:text-brand-700 dark:group-hover:text-brand-300">
+    <span class="opacity-50 font-normal mr-0.5">#</span>{name}
+  </span>
+</a>

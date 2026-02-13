@@ -10,13 +10,17 @@ const navItems = [
 const activePath = Astro.url.pathname;
 ---
 
-<header class="sticky top-0 z-40 border-b backdrop-blur" style="border-color: rgb(var(--line)); background: color-mix(in srgb, rgb(var(--bg-canvas)) 90%, transparent);">
-  <div class="content-container flex h-16 items-center justify-between gap-4">
-    <a href="/" class="text-xl font-bold tracking-wide" style="font-family: var(--font-display);">Signal & Sprocket</a>
+<header class="glass-header">
+  <div class="content-container flex h-20 items-center justify-between gap-4">
+    <a href="/" class="group flex items-center gap-2 text-2xl font-black tracking-tighter" style="font-family: var(--font-display);">
+      <span class="bg-gradient-to-br from-brand-600 to-brand-400 bg-clip-text text-transparent transition-all group-hover:from-brand-500 group-hover:to-brand-300">
+        Signal & Sprocket
+      </span>
+    </a>
 
-    <div class="flex items-center gap-6">
-      <nav>
-        <ul class="flex items-center gap-4">
+    <div class="flex items-center gap-8">
+      <nav class="hidden md:block">
+        <ul class="flex items-center gap-6">
           {navItems.map((item) => (
             <li>
               <a class="nav-link" href={item.href} aria-current={activePath === item.href ? 'page' : undefined}>{item.label}</a>
@@ -24,6 +28,7 @@ const activePath = Astro.url.pathname;
           ))}
         </ul>
       </nav>
+      <div class="h-6 w-px bg-slate-200 dark:bg-slate-800 hidden md:block"></div>
       <ThemeToggle />
     </div>
   </div>

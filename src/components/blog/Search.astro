@@ -1,9 +1,30 @@
-<div class="card-surface p-4">
-  <h2 class="mb-3 text-lg font-bold">検索</h2>
-  <div id="search"></div>
+<div class="card-surface p-6">
+  <h2 class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">Search</h2>
+  <div id="search" class="min-h-[40px]"></div>
 </div>
 
 <link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
+<style is:global>
+  :root {
+    --pagefind-ui-primary: rgb(14 165 233);
+    --pagefind-ui-text: rgb(15 23 42);
+    --pagefind-ui-background: transparent;
+    --pagefind-ui-border: rgb(226 232 240);
+    --pagefind-ui-tag: rgb(241 245 249);
+    --pagefind-ui-border-radius: 12px;
+  }
+
+  html.dark {
+    --pagefind-ui-primary: rgb(56 189 248);
+    --pagefind-ui-text: rgb(241 245 249);
+    --pagefind-ui-border: rgb(31 41 55);
+    --pagefind-ui-tag: rgb(31 41 55);
+  }
+
+  .pagefind-ui__search-input {
+    @apply font-sans !important;
+  }
+</style>
 <script src="/pagefind/pagefind-ui.js" is:inline></script>
 <script is:inline>
   function mountPagefind() {
@@ -16,7 +37,7 @@
       showSubResults: true,
       showImages: false,
       translations: {
-        placeholder: 'キーワードで記事検索',
+        placeholder: '記事を検索...',
       },
     });
   }

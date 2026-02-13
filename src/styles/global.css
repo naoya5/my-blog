@@ -8,53 +8,57 @@
   :root {
     --font-display: 'Playfair Display', 'Times New Roman', serif;
     --font-body: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Yu Gothic', sans-serif;
-    --bg-canvas: 248 246 240;
-    --text-main: 20 30 38;
+    
+    /* Light Mode - Warm & Sophisticated */
+    --bg-canvas: 252 251 247;
+    --text-main: 15 23 42;
+    --text-muted: 71 85 105;
     --surface: 255 255 255;
-    --surface-2: 239 245 247;
-    --line: 205 218 224;
-    --accent: 6 95 120;
-    --accent-strong: 21 128 61;
+    --surface-2: 241 245 249;
+    --line: 226 232 240;
+    --accent: 14 165 233; /* brand-500 */
+    --accent-soft: 224 242 254; /* brand-100 */
+    --shadow-color: 0 0 0;
   }
 
   html.dark {
-    --bg-canvas: 7 16 23;
-    --text-main: 231 242 247;
-    --surface: 16 28 37;
-    --surface-2: 13 35 48;
-    --line: 48 70 83;
-    --accent: 103 232 249;
-    --accent-strong: 110 231 183;
+    /* Dark Mode - Deep & Elegant */
+    --bg-canvas: 10 15 25;
+    --text-main: 241 245 249;
+    --text-muted: 148 163 184;
+    --surface: 17 24 39;
+    --surface-2: 31 41 55;
+    --line: 31 41 55;
+    --accent: 56 189 248; /* brand-400 */
+    --accent-soft: 12 74 110; /* brand-900 */
+    --shadow-color: 0 0 0;
   }
 
   html {
     scroll-behavior: smooth;
-    background: rgb(var(--bg-canvas));
+    background-color: rgb(var(--bg-canvas));
   }
 
   body {
-    @apply antialiased;
+    @apply antialiased selection:bg-brand-200 selection:text-brand-900 dark:selection:bg-brand-800 dark:selection:text-brand-100;
     font-family: var(--font-body);
     color: rgb(var(--text-main));
-    background:
-      radial-gradient(circle at 10% 10%, rgba(34, 197, 94, 0.1), transparent 40%),
-      radial-gradient(circle at 90% 0%, rgba(6, 182, 212, 0.12), transparent 38%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.6), transparent 40%);
+    line-height: 1.6;
     min-height: 100vh;
+    background-image: 
+      radial-gradient(circle at 0% 0%, rgba(var(--accent), 0.05) 0%, transparent 40%),
+      radial-gradient(circle at 100% 100%, rgba(34, 197, 94, 0.05) 0%, transparent 40%);
+    background-attachment: fixed;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
+  h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
-    letter-spacing: 0.01em;
+    font-weight: 700;
+    letter-spacing: -0.01em;
   }
 
   a {
-    color: inherit;
+    @apply transition-all duration-200;
   }
 }
 
@@ -64,161 +68,111 @@
   }
 
   .content-container {
-    @apply mx-auto w-full max-w-6xl px-4 sm:px-6;
+    @apply mx-auto w-full px-4 sm:px-6 lg:px-10;
+    max-width: min(1800px, 96vw);
   }
 
   .card-surface {
     background: rgb(var(--surface));
     border: 1px solid rgb(var(--line));
-    @apply rounded-2xl;
-    box-shadow: 0 20px 40px -35px rgba(2, 12, 21, 0.65);
+    @apply rounded-3xl transition-all duration-300;
+    box-shadow: 0 4px 6px -1px rgba(var(--shadow-color), 0.05), 0 2px 4px -1px rgba(var(--shadow-color), 0.03);
+  }
+
+  .card-surface:hover {
+    @apply translate-y-[-4px];
+    box-shadow: 0 20px 25px -5px rgba(var(--shadow-color), 0.1), 0 10px 10px -5px rgba(var(--shadow-color), 0.04);
+    border-color: rgba(var(--accent), 0.3);
   }
 
   .nav-link {
-    @apply text-sm uppercase tracking-[0.15em] font-semibold transition-colors;
-    color: rgba(var(--text-main), 0.72);
+    @apply relative py-1 text-sm font-medium tracking-wide transition-colors;
+    color: rgb(var(--text-muted));
   }
 
-  .nav-link:hover,
+  .nav-link:hover {
+    color: rgb(var(--text-main));
+  }
+
+  .nav-link::after {
+    content: '';
+    @apply absolute bottom-0 left-0 h-[2px] w-0 bg-brand-500 transition-all duration-300;
+  }
+
+  .nav-link:hover::after,
+  .nav-link[aria-current='page']::after {
+    @apply w-full;
+  }
+
   .nav-link[aria-current='page'] {
-    color: rgb(var(--accent));
+    @apply text-brand-600 dark:text-brand-400 font-semibold;
   }
 
   .chip {
     @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold transition-all;
     border: 1px solid rgb(var(--line));
     background: rgb(var(--surface-2));
-    color: rgb(var(--accent));
+    color: rgb(var(--text-muted));
   }
 
   .chip:hover {
-    background: rgba(var(--accent), 0.14);
+    @apply border-brand-300 text-brand-600;
+    background: rgb(var(--accent-soft));
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-2xl px-6 py-3 text-sm font-bold text-white transition-all active:scale-95;
+    background: rgb(var(--accent));
+    box-shadow: 0 10px 15px -3px rgba(var(--accent), 0.3);
+  }
+
+  .btn-primary:hover {
+    @apply brightness-110;
+    box-shadow: 0 20px 25px -5px rgba(var(--accent), 0.4);
   }
 
   .btn-outline {
-    @apply inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold transition;
-    border: 1px solid rgb(var(--line));
-    background: rgb(var(--surface));
+    @apply inline-flex items-center justify-center rounded-2xl px-6 py-3 text-sm font-bold transition-all active:scale-95;
+    border: 2px solid rgb(var(--line));
+    background: transparent;
   }
 
   .btn-outline:hover {
-    border-color: rgb(var(--accent));
-    color: rgb(var(--accent));
+    @apply border-brand-500 text-brand-600;
+    background: rgb(var(--accent-soft));
   }
 
   .prose {
-    @apply max-w-none;
+    @apply text-slate-700 dark:text-slate-300;
+    max-width: 74ch;
   }
 
   .prose pre {
-    border: 1px solid rgb(var(--line));
-    @apply rounded-xl;
+    @apply rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm;
   }
 
-  .prose img {
-    @apply rounded-xl;
+  .prose h2 {
+    @apply mt-12 mb-6 border-b pb-2 border-slate-100 dark:border-slate-800;
   }
 
-  .anchor-link {
-    @apply no-underline;
-  }
-
-  .remark-link-card-plus__container {
-    @apply my-8;
-  }
-
-  .remark-link-card-plus__card {
-    @apply no-underline flex overflow-hidden rounded-xl border transition;
-    border-color: rgb(var(--line));
-    background: rgb(var(--surface));
-  }
-
-  .remark-link-card-plus__card:hover {
-    box-shadow: 0 16px 30px -26px rgba(6, 95, 120, 0.9);
-  }
-
-  .remark-link-card-plus__main {
-    @apply min-w-0 flex-1 p-4;
-  }
-
-  .remark-link-card-plus__title {
-    @apply line-clamp-2 text-base font-bold;
-  }
-
-  .remark-link-card-plus__description {
-    @apply mt-2 line-clamp-2 text-sm opacity-80;
-  }
-
-  .remark-link-card-plus__meta {
-    @apply mt-3 flex items-center gap-2 text-xs opacity-70;
-  }
-
-  .remark-link-card-plus__thumbnail {
-    @apply hidden w-40 sm:block;
-  }
-
-  .remark-link-card-plus__image {
-    @apply h-full w-full object-cover;
-  }
-
-  .astro-code {
-    @apply my-6 overflow-x-auto rounded-xl border p-4;
-    border-color: rgb(var(--line));
-  }
-
-  .astro-code .highlighted {
-    @apply -mx-4 border-l-4 px-4;
-    border-color: rgba(var(--accent), 0.85);
-    background: rgba(var(--accent), 0.12);
-  }
-
-  .astro-code .diff.add {
-    @apply -mx-4 border-l-4 px-4;
-    border-color: rgba(var(--accent-strong), 0.85);
-    background: rgba(var(--accent-strong), 0.18);
-  }
-
-  .astro-code .diff.remove {
-    @apply -mx-4 border-l-4 px-4;
-    border-color: rgba(248, 113, 113, 0.85);
-    background: rgba(248, 113, 113, 0.14);
+  .markdown-alert {
+    @apply my-6 rounded-2xl border-l-8 p-4 shadow-sm !important;
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .astro-code,
-  .astro-code span {
-    color: var(--shiki-dark) !important;
-    background-color: var(--shiki-dark-bg) !important;
+/* Custom Utilities */
+@layer utilities {
+  .glass-header {
+    @apply sticky top-0 z-50 border-b backdrop-blur-md;
+    border-color: rgba(var(--line), 0.5);
+    background: rgba(var(--bg-canvas), 0.8);
   }
-}
+  
+  .text-balance {
+    text-wrap: balance;
+  }
 
-html.dark .astro-code,
-html.dark .astro-code span {
-  color: var(--shiki-dark) !important;
-  background-color: var(--shiki-dark-bg) !important;
-}
-
-html.dark .markdown-alert {
-  @apply border-opacity-60;
-}
-
-html.dark .markdown-alert-note {
-  @apply bg-cyan-900/25;
-}
-
-html.dark .markdown-alert-tip {
-  @apply bg-emerald-900/25;
-}
-
-html.dark .markdown-alert-important {
-  @apply bg-violet-900/25;
-}
-
-html.dark .markdown-alert-warning {
-  @apply bg-amber-900/25;
-}
-
-html.dark .markdown-alert-caution {
-  @apply bg-rose-900/25;
+  .animate-delay-100 { animation-delay: 100ms; }
+  .animate-delay-200 { animation-delay: 200ms; }
+  .animate-delay-300 { animation-delay: 300ms; }
 }

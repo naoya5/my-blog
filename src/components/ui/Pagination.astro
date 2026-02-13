@@ -9,8 +9,42 @@ interface Props {
 const { currentPage, lastPage, prevUrl, nextUrl } = Astro.props;
 ---
 
-<nav class="mt-12 flex items-center justify-center gap-4" aria-label="ページネーション">
-  {prevUrl ? <a class="btn-outline" href={prevUrl}>前へ</a> : <span class="btn-outline opacity-50">前へ</span>}
-  <span class="text-sm">{currentPage} / {lastPage}</span>
-  {nextUrl ? <a class="btn-outline" href={nextUrl}>次へ</a> : <span class="btn-outline opacity-50">次へ</span>}
+<nav class="mt-20 flex items-center justify-center gap-2 sm:gap-4" aria-label="ページネーション">
+  {prevUrl ? (
+    <a class="btn-outline flex h-12 w-12 items-center justify-center p-0 sm:w-auto sm:px-6" href={prevUrl} aria-label="Previous page">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      <span class="hidden sm:inline">PREV</span>
+    </a>
+  ) : (
+    <span class="btn-outline flex h-12 w-12 cursor-not-allowed items-center justify-center p-0 opacity-30 sm:w-auto sm:px-6">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      <span class="hidden sm:inline">PREV</span>
+    </span>
+  )}
+
+  <div class="flex items-center gap-1 px-4 py-2 font-black tracking-tighter" style="font-family: var(--font-display);">
+    <span class="text-2xl text-brand-600 dark:text-brand-400">{currentPage}</span>
+    <span class="text-slate-300">/</span>
+    <span class="text-lg text-slate-500">{lastPage}</span>
+  </div>
+
+  {nextUrl ? (
+    <a class="btn-outline flex h-12 w-12 items-center justify-center p-0 sm:w-auto sm:px-6" href={nextUrl} aria-label="Next page">
+      <span class="hidden sm:inline">NEXT</span>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </a>
+  ) : (
+    <span class="btn-outline flex h-12 w-12 cursor-not-allowed items-center justify-center p-0 opacity-30 sm:w-auto sm:px-6">
+      <span class="hidden sm:inline">NEXT</span>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </span>
+  )}
 </nav>
