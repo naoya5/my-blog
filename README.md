@@ -104,3 +104,4 @@ pnpm deploy
 - `docs/01-SETUP-GUIDE.md`
 - `docs/02-CONTENT-COLLECTIONS.md`
 - `docs/08-MARKDOWN-PLUGINS.md`
+- `BLOG_PUBLISHING_WORKFLOW.md`（記事執筆〜反映フロー）
