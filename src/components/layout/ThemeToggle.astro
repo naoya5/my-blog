@@ -45,45 +45,75 @@
 </button>
 
 <script is:inline>
-  const THEME_KEY = 'theme';
+  (() => {
+    const THEME_KEY = 'theme';
+    const AFTER_SWAP_HANDLER_KEY = '__themeToggleAfterSwapHandler';
 
-  function preferredTheme() {
-    const saved = localStorage.getItem(THEME_KEY);
-    if (saved === 'light' || saved === 'dark') return saved;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  }
-
-  function applyTheme(theme) {
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-    const lightIcon = document.querySelector('[data-theme-icon="light"]');
-    const darkIcon = document.querySelector('[data-theme-icon="dark"]');
-    if (lightIcon && darkIcon) {
-      lightIcon.classList.toggle('hidden', theme !== 'light');
-      darkIcon.classList.toggle('hidden', theme !== 'dark');
-      
-      // Add a little spin animation
-      const targetIcon = theme === 'light' ? lightIcon : darkIcon;
-      targetIcon.animate([
-        { transform: 'translate(-50%, -50%) rotate(-90deg)', opacity: 0 },
-        { transform: 'translate(-50%, -50%) rotate(0)', opacity: 1 }
-      ], { duration: 300, easing: 'ease-out' });
+    function readStoredTheme() {
+      try {
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved === 'light' || saved === 'dark') return saved;
+      } catch {
+        // localStorage can throw in some private browsing contexts.
+      }
+      return null;
     }
-  }
 
-  function mountToggle() {
-    const button = document.getElementById('theme-toggle');
-    if (!button || button.dataset.bound === '1') return;
+    function preferredTheme() {
+      const saved = readStoredTheme();
+      if (saved) return saved;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
 
-    button.dataset.bound = '1';
-    applyTheme(preferredTheme());
+    function persistTheme(theme) {
+      try {
+        localStorage.setItem(THEME_KEY, theme);
+      } catch {
+        // Fall back to in-memory behavior when persistence is unavailable.
+      }
+    }
 
-    button.addEventListener('click', () => {
-      const next = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
-      localStorage.setItem(THEME_KEY, next);
-      applyTheme(next);
-    });
-  }
+    function applyTheme(theme) {
+      document.documentElement.classList.toggle('dark', theme === 'dark');
+      const lightIcon = document.querySelector('[data-theme-icon="light"]');
+      const darkIcon = document.querySelector('[data-theme-icon="dark"]');
+      if (lightIcon && darkIcon) {
+        lightIcon.classList.toggle('hidden', theme !== 'light');
+        darkIcon.classList.toggle('hidden', theme !== 'dark');
 
-  mountToggle();
-  document.addEventListener('astro:after-swap', mountToggle);
+        const targetIcon = theme === 'light' ? lightIcon : darkIcon;
+        if (typeof targetIcon.animate === 'function') {
+          targetIcon.animate(
+            [
+              { transform: 'translate(-50%, -50%) rotate(-90deg)', opacity: 0 },
+              { transform: 'translate(-50%, -50%) rotate(0)', opacity: 1 },
+            ],
+            { duration: 300, easing: 'ease-out' },
+          );
+        }
+      }
+    }
+
+    function mountToggle() {
+      const button = document.getElementById('theme-toggle');
+      if (!button || button.dataset.bound === '1') return;
+
+      button.dataset.bound = '1';
+      applyTheme(preferredTheme());
+
+      button.addEventListener('click', () => {
+        const next = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+        persistTheme(next);
+        applyTheme(next);
+      });
+    }
+
+    if (typeof window[AFTER_SWAP_HANDLER_KEY] === 'function') {
+      document.removeEventListener('astro:after-swap', window[AFTER_SWAP_HANDLER_KEY]);
+    }
+    window[AFTER_SWAP_HANDLER_KEY] = mountToggle;
+
+    mountToggle();
+    document.addEventListener('astro:after-swap', mountToggle);
+  })();
 </script>

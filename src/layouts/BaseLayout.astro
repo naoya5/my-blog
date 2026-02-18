@@ -24,7 +24,12 @@ const { title, description, image, type, publishedTime, modifiedTime, tags } = A
   <head>
     <script is:inline>
       (() => {
-        const theme = localStorage.getItem('theme');
+        let theme = null;
+        try {
+          theme = localStorage.getItem('theme');
+        } catch {
+          // localStorage can be unavailable in strict privacy modes.
+        }
         const isDark = theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches);
         document.documentElement.classList.toggle('dark', isDark);
       })();

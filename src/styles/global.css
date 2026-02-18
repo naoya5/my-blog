@@ -63,6 +63,74 @@
 }
 
 @layer components {
+  .pagefind-ui {
+    color: rgb(var(--text-main));
+  }
+
+  .pagefind-ui__search-input {
+    border: 1px solid rgb(var(--line));
+    background: rgb(var(--surface));
+    color: rgb(var(--text-main));
+  }
+
+  .pagefind-ui__search-input::placeholder {
+    color: rgb(var(--text-muted));
+    opacity: 0.92;
+  }
+
+  .pagefind-ui__search-input:focus {
+    border-color: rgb(var(--accent));
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(var(--accent), 0.22);
+  }
+
+  .pagefind-ui__result {
+    border: 1px solid rgb(var(--line));
+    border-radius: 14px;
+    background: rgb(var(--surface));
+    padding: 1rem 1rem 0.95rem;
+  }
+
+  .pagefind-ui__result-link,
+  .pagefind-ui__result-title {
+    color: rgb(var(--text-main));
+  }
+
+  .pagefind-ui__result-excerpt {
+    color: rgb(var(--text-muted));
+  }
+
+  .pagefind-ui__result mark {
+    border-radius: 0.35rem;
+    background: rgba(var(--accent), 0.24);
+    color: rgb(var(--text-main));
+    padding-inline: 0.2rem;
+  }
+
+  html.dark .pagefind-ui__search-input {
+    border-color: rgb(71 85 105 / 0.8);
+    background: rgb(15 23 42 / 0.9);
+    color: rgb(241 245 249);
+  }
+
+  html.dark .pagefind-ui__search-input::placeholder {
+    color: rgb(148 163 184 / 0.92);
+  }
+
+  html.dark .pagefind-ui__result {
+    border-color: rgb(71 85 105 / 0.72);
+    background: rgb(15 23 42 / 0.92);
+  }
+
+  html.dark .pagefind-ui__result-link,
+  html.dark .pagefind-ui__result-title {
+    color: rgb(241 245 249);
+  }
+
+  html.dark .pagefind-ui__result-excerpt {
+    color: rgb(203 213 225);
+  }
+
   .site-shell {
     @apply min-h-screen flex flex-col;
   }
@@ -106,6 +174,163 @@
 
   .nav-link[aria-current='page'] {
     @apply text-brand-600 dark:text-brand-400 font-semibold;
+  }
+
+  .site-mark {
+    @apply text-lg font-black tracking-tight transition-colors;
+    font-family: var(--font-body);
+    color: rgb(var(--text-main));
+  }
+
+  .site-mark:hover {
+    color: rgb(var(--accent));
+  }
+
+  .header-pill {
+    @apply mx-auto flex h-14 w-full items-center justify-between gap-3 rounded-full border px-3 sm:px-4;
+    border-color: rgba(var(--line), 0.85);
+    background:
+      linear-gradient(140deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      0 18px 38px -24px rgba(15, 23, 42, 0.32);
+  }
+
+  .floating-nav-link {
+    @apply inline-flex items-center rounded-full px-3 py-1.5 text-sm font-semibold transition-all duration-200;
+    color: rgb(var(--text-muted));
+  }
+
+  .floating-nav-link:hover {
+    background: rgba(var(--surface-2), 0.95);
+    color: rgb(var(--text-main));
+  }
+
+  .floating-nav-link[aria-current='page'] {
+    background: rgba(var(--accent), 0.14);
+    color: rgb(var(--accent));
+  }
+
+  .header-tools {
+    @apply ml-auto flex items-center gap-2;
+  }
+
+  .floating-search {
+    @apply items-center gap-2 rounded-xl border px-3 py-1.5 text-sm font-medium transition-colors;
+    min-width: 210px;
+    border-color: rgba(var(--line), 0.9);
+    background: rgba(var(--surface), 0.86);
+    color: rgb(var(--text-muted));
+  }
+
+  .floating-search:hover {
+    color: rgb(var(--text-main));
+    border-color: rgba(var(--accent), 0.45);
+    background: rgba(var(--surface), 0.98);
+  }
+
+  .shortcut-hint {
+    @apply ml-auto rounded-md px-1.5 py-0.5 text-[11px] font-semibold;
+    color: rgb(var(--text-muted));
+    background: rgba(var(--surface-2), 0.9);
+    border: 1px solid rgba(var(--line), 0.8);
+  }
+
+  .floating-icon-btn {
+    @apply h-9 w-9 items-center justify-center rounded-xl border transition-colors;
+    border-color: rgba(var(--line), 0.9);
+    background: rgba(var(--surface), 0.86);
+    color: rgb(var(--text-muted));
+  }
+
+  .floating-icon-btn:hover {
+    color: rgb(var(--text-main));
+    border-color: rgba(var(--accent), 0.45);
+    background: rgba(var(--surface), 0.98);
+  }
+
+  .header-pill #theme-toggle {
+    @apply h-9 w-9 rounded-xl border;
+    border-color: rgba(var(--line), 0.9);
+    background: rgba(var(--surface), 0.86);
+    color: rgb(var(--text-muted));
+  }
+
+  .header-pill #theme-toggle:hover {
+    color: rgb(var(--text-main));
+    border-color: rgba(var(--accent), 0.45);
+    background: rgba(var(--surface), 0.98);
+  }
+
+  html.dark .site-mark {
+    color: rgb(241 245 249);
+  }
+
+  html.dark .site-mark:hover {
+    color: rgb(255 255 255);
+  }
+
+  html.dark .header-pill {
+    border-color: rgba(148, 163, 184, 0.2);
+    background:
+      linear-gradient(140deg, rgba(30, 41, 59, 0.95), rgba(17, 24, 39, 0.92));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 18px 38px -22px rgba(2, 6, 23, 0.75);
+  }
+
+  html.dark .floating-nav-link {
+    color: rgb(226 232 240);
+  }
+
+  html.dark .floating-nav-link:hover {
+    @apply bg-slate-700/60 text-white;
+  }
+
+  html.dark .floating-nav-link[aria-current='page'] {
+    @apply bg-slate-700 text-sky-200;
+  }
+
+  html.dark .floating-search {
+    color: rgb(203 213 225);
+    border-color: rgba(148, 163, 184, 0.28);
+    background: rgba(15, 23, 42, 0.55);
+  }
+
+  html.dark .floating-search:hover {
+    @apply text-slate-100;
+    border-color: rgba(125, 211, 252, 0.45);
+    background: rgba(15, 23, 42, 0.72);
+  }
+
+  html.dark .shortcut-hint {
+    @apply text-slate-400;
+    background: rgba(15, 23, 42, 0.9);
+    border-color: rgba(148, 163, 184, 0.22);
+  }
+
+  html.dark .floating-icon-btn {
+    color: rgb(203 213 225);
+    border-color: rgba(148, 163, 184, 0.3);
+    background: rgba(15, 23, 42, 0.55);
+  }
+
+  html.dark .floating-icon-btn:hover {
+    @apply text-slate-100;
+    border-color: rgba(125, 211, 252, 0.45);
+    background: rgba(15, 23, 42, 0.75);
+  }
+
+  html.dark .header-pill #theme-toggle {
+    color: rgb(203 213 225);
+    border-color: rgba(148, 163, 184, 0.3);
+    background: rgba(15, 23, 42, 0.55);
+  }
+
+  html.dark .header-pill #theme-toggle:hover {
+    @apply text-slate-100;
+    border-color: rgba(125, 211, 252, 0.45);
+    background: rgba(15, 23, 42, 0.75);
   }
 
   .chip {
@@ -163,9 +388,16 @@
 /* Custom Utilities */
 @layer utilities {
   .glass-header {
-    @apply sticky top-0 z-50 border-b backdrop-blur-md;
-    border-color: rgba(var(--line), 0.5);
-    background: rgba(var(--bg-canvas), 0.8);
+    @apply fixed inset-x-0 top-0 z-50 pt-3 transition-transform duration-300 ease-out;
+    pointer-events: none;
+  }
+
+  .glass-header > .content-container {
+    pointer-events: auto;
+  }
+
+  .header-hidden {
+    transform: translateY(calc(-100% - 0.75rem));
   }
   
   .text-balance {

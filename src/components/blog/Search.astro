@@ -9,55 +9,161 @@
 <link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
 <style is:global>
   :root {
-    --pagefind-ui-primary: rgb(14 165 233);
-    --pagefind-ui-text: rgb(15 23 42);
-    --pagefind-ui-background: transparent;
-    --pagefind-ui-border: rgb(226 232 240);
-    --pagefind-ui-tag: rgb(241 245 249);
+    --pagefind-ui-primary: rgb(var(--accent));
+    --pagefind-ui-text: rgb(var(--text-main));
+    --pagefind-ui-background: rgb(var(--surface));
+    --pagefind-ui-border: rgb(var(--line));
+    --pagefind-ui-tag: rgb(var(--surface-2));
     --pagefind-ui-border-radius: 12px;
   }
 
   html.dark {
-    --pagefind-ui-primary: rgb(56 189 248);
+    --pagefind-ui-primary: rgb(125 211 252);
     --pagefind-ui-text: rgb(241 245 249);
-    --pagefind-ui-border: rgb(31 41 55);
-    --pagefind-ui-tag: rgb(31 41 55);
+    --pagefind-ui-background: rgb(15 23 42 / 0.92);
+    --pagefind-ui-border: rgb(71 85 105 / 0.75);
+    --pagefind-ui-tag: rgb(30 41 59);
   }
 
   .pagefind-ui__search-input {
     @apply font-sans !important;
   }
 </style>
-<script src="/pagefind/pagefind-ui.js" is:inline></script>
-<script is:inline>
-  function showSearchError(host, fallback, reason) {
-    host.setAttribute('data-search-status', 'error');
-    fallback?.classList.remove('hidden');
-    console.warn('[search] Pagefind initialization failed:', reason);
-  }
+<script src="/pagefind/pagefind-ui.js" is:inline data-astro-rerun></script>
+<script is:inline data-astro-rerun>
+  (() => {
+    const SEARCH_FOCUS_FLAG = 'blog-search-focus-requested';
+    const SEARCH_FOCUS_EVENT = 'blog-search:focus-requested';
+    const SEARCH_FOCUS_HANDLER_KEY = '__blogSearchFocusHandler';
+    const SEARCH_INIT_RETRY_TIMER_KEY = '__blogSearchInitRetryTimer';
+    const SEARCH_PAGE_LOAD_HANDLER_KEY = '__blogSearchPageLoadHandler';
+    const SEARCH_AFTER_SWAP_HANDLER_KEY = '__blogSearchAfterSwapHandler';
 
-  function mountPagefind() {
-    const host = document.querySelector('#search');
-    const fallback = document.querySelector('#search-fallback');
-    if (!host || host.getAttribute('data-bound') === '1') return;
-    if (!window.PagefindUI) {
-      showSearchError(host, fallback, 'window.PagefindUI is unavailable');
-      return;
+    function clearRetryTimer() {
+      const timer = window[SEARCH_INIT_RETRY_TIMER_KEY];
+      if (typeof timer === 'number') {
+        window.clearTimeout(timer);
+      }
+      window[SEARCH_INIT_RETRY_TIMER_KEY] = null;
     }
 
-    host.setAttribute('data-bound', '1');
-    host.setAttribute('data-search-status', 'ready');
-    fallback?.classList.add('hidden');
-    new window.PagefindUI({
-      element: '#search',
-      showSubResults: true,
-      showImages: false,
-      translations: {
-        placeholder: '記事を検索...',
-      },
-    });
-  }
+    function showSearchError(host, fallback, reason) {
+      host.setAttribute('data-search-status', 'error');
+      host.removeAttribute('data-bound');
+      fallback?.classList.remove('hidden');
+      console.warn('[search] Pagefind initialization failed:', reason);
+    }
 
-  mountPagefind();
-  document.addEventListener('astro:after-swap', mountPagefind);
+    function consumeSearchFocusRequest() {
+      try {
+        if (sessionStorage.getItem(SEARCH_FOCUS_FLAG) !== '1') return false;
+        sessionStorage.removeItem(SEARCH_FOCUS_FLAG);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    function focusSearchInput() {
+      const input = document.querySelector('#search .pagefind-ui__search-input');
+      if (!(input instanceof HTMLInputElement)) return false;
+
+      try {
+        input.focus({ preventScroll: true });
+      } catch {
+        input.focus();
+      }
+      input.select?.();
+      return true;
+    }
+
+    function focusSearchInputWhenReady(attempt = 0) {
+      if (focusSearchInput()) return;
+      if (attempt >= 24) return;
+      window.requestAnimationFrame(() => focusSearchInputWhenReady(attempt + 1));
+    }
+
+    function bindSearchFocusListener() {
+      if (typeof window[SEARCH_FOCUS_HANDLER_KEY] === 'function') {
+        window.removeEventListener(SEARCH_FOCUS_EVENT, window[SEARCH_FOCUS_HANDLER_KEY]);
+      }
+
+      const onSearchFocusRequested = () => {
+        consumeSearchFocusRequest();
+        focusSearchInputWhenReady();
+      };
+      window[SEARCH_FOCUS_HANDLER_KEY] = onSearchFocusRequested;
+      window.addEventListener(SEARCH_FOCUS_EVENT, onSearchFocusRequested);
+    }
+
+    function mountPagefind(attempt = 0) {
+      const host = document.querySelector('#search');
+      const fallback = document.querySelector('#search-fallback');
+      if (!host) {
+        clearRetryTimer();
+        return;
+      }
+
+      const shouldFocusAfterMount = consumeSearchFocusRequest();
+      if (host.getAttribute('data-bound') === '1') {
+        if (shouldFocusAfterMount) focusSearchInputWhenReady();
+        return;
+      }
+
+      if (!window.PagefindUI) {
+        if (attempt < 20) {
+          clearRetryTimer();
+          window[SEARCH_INIT_RETRY_TIMER_KEY] = window.setTimeout(() => mountPagefind(attempt + 1), 80);
+          return;
+        }
+
+        showSearchError(host, fallback, 'window.PagefindUI is unavailable');
+        return;
+      }
+
+      fallback?.classList.add('hidden');
+      host.setAttribute('data-search-status', 'loading');
+
+      try {
+        new window.PagefindUI({
+          element: '#search',
+          showSubResults: true,
+          showImages: false,
+          translations: {
+            placeholder: '記事を検索...',
+          },
+        });
+        host.setAttribute('data-bound', '1');
+        host.setAttribute('data-search-status', 'ready');
+        clearRetryTimer();
+      } catch (error) {
+        clearRetryTimer();
+        showSearchError(host, fallback, error);
+        return;
+      }
+
+      if (shouldFocusAfterMount) focusSearchInputWhenReady();
+    }
+
+    function bindLifecycleListeners() {
+      if (typeof window[SEARCH_PAGE_LOAD_HANDLER_KEY] === 'function') {
+        document.removeEventListener('astro:page-load', window[SEARCH_PAGE_LOAD_HANDLER_KEY]);
+      }
+      if (typeof window[SEARCH_AFTER_SWAP_HANDLER_KEY] === 'function') {
+        document.removeEventListener('astro:after-swap', window[SEARCH_AFTER_SWAP_HANDLER_KEY]);
+      }
+
+      const onPageLoad = () => mountPagefind();
+      const onAfterSwap = () => mountPagefind();
+      window[SEARCH_PAGE_LOAD_HANDLER_KEY] = onPageLoad;
+      window[SEARCH_AFTER_SWAP_HANDLER_KEY] = onAfterSwap;
+
+      document.addEventListener('astro:page-load', onPageLoad);
+      document.addEventListener('astro:after-swap', onAfterSwap);
+    }
+
+    bindSearchFocusListener();
+    bindLifecycleListeners();
+    mountPagefind();
+  })();
 </script>
