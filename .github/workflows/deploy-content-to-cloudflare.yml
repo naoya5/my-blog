@@ -1,0 +1,88 @@
+name: Deploy Blog Content to Cloudflare Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/content/blog/**/*.md'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Decide whether deployment is needed
+        id: should_deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          BEFORE_SHA="${{ github.event.before }}"
+          CURRENT_SHA="${{ github.sha }}"
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "reason=Manual dispatch" >> "$GITHUB_OUTPUT"
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ "$BEFORE_SHA" == "0000000000000000000000000000000000000000" ]]; then
+            echo "reason=Initial push detected" >> "$GITHUB_OUTPUT"
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          ADDED_FILES="$(git diff --name-only --diff-filter=A "$BEFORE_SHA" "$CURRENT_SHA" -- src/content/blog | grep -E '\.md$' || true)"
+          if [[ -n "$ADDED_FILES" ]]; then
+            echo "reason=New article file added" >> "$GITHUB_OUTPUT"
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          CONTENT_DIFF="$(git diff "$BEFORE_SHA" "$CURRENT_SHA" -- src/content/blog)"
+          if grep -Eq '^-draft:\s*(true|false)$' <<< "$CONTENT_DIFF" && grep -Eq '^\+draft:\s*(true|false)$' <<< "$CONTENT_DIFF"; then
+            echo "reason=draft value changed in blog content" >> "$GITHUB_OUTPUT"
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "reason=No new article or draft toggle detected" >> "$GITHUB_OUTPUT"
+          echo "deploy=false" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Node.js
+        if: steps.should_deploy.outputs.deploy == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install pnpm (without Corepack)
+        if: steps.should_deploy.outputs.deploy == 'true'
+        run: npm install -g pnpm@9.15.5
+
+      - name: Install dependencies
+        if: steps.should_deploy.outputs.deploy == 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Build site
+        if: steps.should_deploy.outputs.deploy == 'true'
+        run: pnpm build
+
+      - name: Deploy to Cloudflare Pages
+        if: steps.should_deploy.outputs.deploy == 'true'
+        run: pnpm wrangler pages deploy ./dist --project-name my-blog
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Skip deployment summary
+        if: steps.should_deploy.outputs.deploy != 'true'
+        run: echo "Skipping deploy - ${{ steps.should_deploy.outputs.reason }}"

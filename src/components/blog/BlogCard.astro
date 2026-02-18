@@ -9,19 +9,32 @@ interface Props {
 }
 
 const { post } = Astro.props;
+const heroImage = post.data.heroImage;
 ---
 
 <article class="card-surface group flex flex-col overflow-hidden">
   <a href={`/blog/${post.slug}/`} class="flex flex-col h-full">
-    {post.data.heroImage && (
+    {heroImage && (
       <div class="relative aspect-video overflow-hidden">
-        <Image
-          src={post.data.heroImage}
-          alt={post.data.title}
-          width={800}
-          height={450}
-          class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-        />
+        {typeof heroImage === 'string' ? (
+          <img
+            src={heroImage}
+            alt={post.data.title}
+            width="800"
+            height="450"
+            loading="lazy"
+            decoding="async"
+            class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+        ) : (
+          <Image
+            src={heroImage}
+            alt={post.data.title}
+            width={800}
+            height={450}
+            class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+        )}
         <div class="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
       </div>
     )}
