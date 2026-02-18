@@ -7,7 +7,7 @@
     "start": "astro dev",
     "build": "astro check && astro build && pagefind --site dist",
     "preview": "astro preview",
-    "deploy": "astro build && wrangler pages deploy ./dist",
+    "deploy": "pnpm build && wrangler pages deploy ./dist",
     "astro": "astro"
   },
   "dependencies": {
