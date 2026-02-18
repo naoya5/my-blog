@@ -75,6 +75,11 @@ pnpm deploy
 1. `pnpm build`
 2. `pnpm deploy`
 
+補足:
+
+- `pnpm deploy` は `pnpm build` を内包し、`dist/pagefind/*` の生成まで実施します。
+- 検索 UI が反応しない場合の first check は `dist/pagefind/pagefind-ui.js` と `dist/pagefind/pagefind-entry.json` の存在確認です。
+
 ## 7. 公開チェックリスト
 
 - [ ] `draft: false`

@@ -62,7 +62,7 @@ pnpm build
 - `pnpm start`: `pnpm dev` のエイリアス
 - `pnpm build`: `astro check && astro build && pagefind --site dist`
 - `pnpm preview`: ビルド結果のプレビュー
-- `pnpm deploy`: Cloudflare Pages へデプロイ
+- `pnpm deploy`: `pnpm build`（型チェック・静的ビルド・Pagefind 生成）を実行後に Cloudflare Pages へデプロイ
 - `pnpm astro`: Astro CLI
 
 ## コンテンツ運用
@@ -90,6 +90,8 @@ Cloudflare Pages を利用します。
 ```bash
 pnpm deploy
 ```
+
+`pnpm deploy` は内部で `pnpm build` を実行するため、検索インデックス（`dist/pagefind/*`）生成込みでデプロイされます。
 
 ## 公開前に変更する設定
 
