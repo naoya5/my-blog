@@ -18,6 +18,9 @@ export default defineConfig({
   output: 'static',
   trailingSlash: 'always',
   adapter: cloudflare({ imageService: 'passthrough' }),
+  image: {
+    domains: ['images.unsplash.com'],
+  },
   integrations: [tailwind({ applyBaseStyles: false }), sitemap()],
   markdown: {
     shikiConfig: {
