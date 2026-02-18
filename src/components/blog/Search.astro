@@ -1,6 +1,9 @@
 <div class="card-surface p-6">
   <h2 class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">Search</h2>
-  <div id="search" class="min-h-[40px]"></div>
+  <div id="search" class="min-h-[40px]" data-search-status="loading"></div>
+  <p id="search-fallback" class="mt-3 hidden text-sm text-rose-500" role="status">
+    検索を読み込めませんでした。時間をおいて再度お試しください。
+  </p>
 </div>
 
 <link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
@@ -27,11 +30,24 @@
 </style>
 <script src="/pagefind/pagefind-ui.js" is:inline></script>
 <script is:inline>
+  function showSearchError(host, fallback, reason) {
+    host.setAttribute('data-search-status', 'error');
+    fallback?.classList.remove('hidden');
+    console.warn('[search] Pagefind initialization failed:', reason);
+  }
+
   function mountPagefind() {
     const host = document.querySelector('#search');
-    if (!host || host.getAttribute('data-bound') === '1' || !window.PagefindUI) return;
+    const fallback = document.querySelector('#search-fallback');
+    if (!host || host.getAttribute('data-bound') === '1') return;
+    if (!window.PagefindUI) {
+      showSearchError(host, fallback, 'window.PagefindUI is unavailable');
+      return;
+    }
 
     host.setAttribute('data-bound', '1');
+    host.setAttribute('data-search-status', 'ready');
+    fallback?.classList.add('hidden');
     new window.PagefindUI({
       element: '#search',
       showSubResults: true,
