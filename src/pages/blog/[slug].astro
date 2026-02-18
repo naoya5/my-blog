@@ -26,9 +26,12 @@ const { post } = Astro.props as Props;
 const { Content, headings } = await post.render();
 const posts = await getCollection('blog', ({ data }) => (import.meta.env.PROD ? !data.draft : true));
 const relatedPosts = getRelatedPosts(post, posts);
+const heroImage = post.data.heroImage;
 
-const heroForSchema = post.data.heroImage
-  ? new URL(post.data.heroImage.src, Astro.site).toString()
+const heroForSchema = heroImage
+  ? typeof heroImage === 'string'
+    ? heroImage
+    : new URL(heroImage.src, Astro.site).toString()
   : new URL('/images/default-og.svg', Astro.site).toString();
 
 const schema = {
@@ -51,7 +54,7 @@ const schema = {
 <BaseLayout
   title={`${post.data.title} | Signal & Sprocket`}
   description={post.data.description}
-  image={post.data.heroImage}
+  image={heroImage}
   type="article"
   publishedTime={post.data.pubDate}
   modifiedTime={post.data.updatedDate}
@@ -82,16 +85,28 @@ const schema = {
             {post.data.tags.map((tag) => <Tag name={tag} />)}
           </div>
 
-          {post.data.heroImage && (
+          {heroImage && (
             <div class="mt-12 overflow-hidden rounded-3xl border border-slate-200 shadow-2xl dark:border-slate-800">
-              <Image
-                src={post.data.heroImage}
-                alt={post.data.title}
-                width={1200}
-                height={630}
-                class="aspect-[21/9] w-full object-cover"
-                loading="eager"
-              />
+              {typeof heroImage === 'string' ? (
+                <img
+                  src={heroImage}
+                  alt={post.data.title}
+                  width="1200"
+                  height="630"
+                  class="aspect-[21/9] w-full object-cover"
+                  loading="eager"
+                  decoding="async"
+                />
+              ) : (
+                <Image
+                  src={heroImage}
+                  alt={post.data.title}
+                  width={1200}
+                  height={630}
+                  class="aspect-[21/9] w-full object-cover"
+                  loading="eager"
+                />
+              )}
             </div>
           )}
         </header>

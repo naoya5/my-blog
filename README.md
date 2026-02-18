@@ -65,6 +65,17 @@ pnpm build
 - `pnpm deploy`: `pnpm build`（型チェック・静的ビルド・Pagefind 生成）を実行後に Cloudflare Pages へデプロイ
 - `pnpm astro`: Astro CLI
 
+## トラブルシューティング
+
+### Corepack の `Cannot find matching keyid` が出る場合
+
+`corepack` の署名キー不整合で発生します。以下で `corepack` を介さず `pnpm` を固定してください。
+
+```bash
+npm install -g pnpm@9.15.5
+pnpm --version
+```
+
 ## コンテンツ運用
 
 記事は `src/content/blog/` 配下の Markdown で管理します。  
@@ -76,12 +87,14 @@ title: "記事タイトル"
 description: "記事の説明"
 pubDate: 2026-02-13
 updatedDate: 2026-02-13
+heroImage: "./images/hero.jpg" # または https://... の外部URL
 tags: ["astro", "tailwind"]
 draft: false
 ---
 ```
 
 `draft: true` は本番ビルドで除外されます。
+外部URL画像を使う場合は `astro.config.mjs` の `image.domains` 設定が必要です。
 
 ## デプロイ
 
@@ -92,6 +105,21 @@ pnpm deploy
 ```
 
 `pnpm deploy` は内部で `pnpm build` を実行するため、検索インデックス（`dist/pagefind/*`）生成込みでデプロイされます。
+
+### 自動デプロイ（記事追加 / draft変更）
+
+`.github/workflows/deploy-content-to-cloudflare.yml` により、`main` ブランチへの push 時に以下の場合のみ自動デプロイされます。
+
+- `src/content/blog/**/*.md` の新規追加
+- `draft` フィールドの変更（`false -> true` / `true -> false`）
+
+事前に GitHub Secrets を設定してください。
+
+- `CLOUDFLARE_API_TOKEN`
+- `CLOUDFLARE_ACCOUNT_ID`
+
+補足:
+- Cloudflare Pages の Git 連携も有効にしている場合、二重デプロイになります。どちらか一方に統一してください。
 
 ## 公開前に変更する設定
 
@@ -106,4 +134,5 @@ pnpm deploy
 - `docs/01-SETUP-GUIDE.md`
 - `docs/02-CONTENT-COLLECTIONS.md`
 - `docs/08-MARKDOWN-PLUGINS.md`
+- `docs/11-HOSTING-DECISION-GUIDE.md`（ホスティング比較・料金・運用方針）
 - `BLOG_PUBLISHING_WORKFLOW.md`（記事執筆〜反映フロー）
