@@ -333,6 +333,57 @@
     background: rgba(15, 23, 42, 0.75);
   }
 
+  .site-search-dialog {
+    width: min(860px, calc(100vw - 2rem));
+    margin: 8vh auto 0;
+    border: none;
+    background: transparent;
+    padding: 0;
+    color: rgb(var(--text-main));
+  }
+
+  .site-search-dialog::backdrop {
+    background: rgba(2, 6, 23, 0.62);
+    backdrop-filter: blur(6px);
+  }
+
+  .search-modal-panel {
+    @apply rounded-3xl p-4 sm:p-6;
+
+    max-height: min(78vh, 760px);
+    overflow: auto;
+  }
+
+  .search-modal-head {
+    @apply mb-4 flex items-center justify-between gap-4;
+  }
+
+  .search-modal-close {
+    @apply inline-flex items-center rounded-xl border px-3 py-1.5 text-sm font-semibold transition-colors;
+
+    border-color: rgba(var(--line), 0.9);
+    background: rgba(var(--surface), 0.9);
+    color: rgb(var(--text-muted));
+  }
+
+  .search-modal-close:hover {
+    color: rgb(var(--text-main));
+    border-color: rgba(var(--accent), 0.45);
+  }
+
+  html.dark .search-modal-close {
+    color: rgb(203 213 225);
+    border-color: rgba(148, 163, 184, 0.3);
+    background: rgba(15, 23, 42, 0.55);
+  }
+
+  html.dark .search-modal-close:hover {
+    @apply text-slate-100;
+
+    border-color: rgba(125, 211, 252, 0.45);
+    background: rgba(15, 23, 42, 0.75);
+  }
+
   .chip {
     @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold transition-all;
     border: 1px solid rgb(var(--line));
@@ -387,6 +438,10 @@
 
 /* Custom Utilities */
 @layer utilities {
+  .search-modal-open {
+    overflow: hidden;
+  }
+
   .glass-header {
     @apply fixed inset-x-0 top-0 z-50 pt-3 transition-transform duration-300 ease-out;
     pointer-events: none;
