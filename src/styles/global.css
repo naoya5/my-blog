@@ -349,6 +349,7 @@
 
   .search-modal-panel {
     @apply rounded-3xl p-4 sm:p-6;
+
     max-height: min(78vh, 760px);
     overflow: auto;
   }
@@ -359,6 +360,7 @@
 
   .search-modal-close {
     @apply inline-flex items-center rounded-xl border px-3 py-1.5 text-sm font-semibold transition-colors;
+
     border-color: rgba(var(--line), 0.9);
     background: rgba(var(--surface), 0.9);
     color: rgb(var(--text-muted));
@@ -377,6 +379,7 @@
 
   html.dark .search-modal-close:hover {
     @apply text-slate-100;
+
     border-color: rgba(125, 211, 252, 0.45);
     background: rgba(15, 23, 42, 0.75);
   }

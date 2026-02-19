@@ -13,8 +13,6 @@
   </div>
 </dialog>
 
-<link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
-<script src="/pagefind/pagefind-ui.js" is:inline data-astro-rerun></script>
 <script is:inline data-astro-rerun>
   (() => {
     const SEARCH_OPEN_EVENT = 'site-search:open';
@@ -28,7 +26,6 @@
     const SEARCH_CLICK_HANDLER_KEY = '__siteSearchModalClickHandler';
     const SEARCH_CANCEL_HANDLER_KEY = '__siteSearchModalCancelHandler';
     const SEARCH_CLOSE_EVENT_HANDLER_KEY = '__siteSearchModalCloseEventHandler';
-    const SEARCH_AFTER_SWAP_HANDLER_KEY = '__siteSearchModalAfterSwapHandler';
     const SEARCH_INIT_RETRY_TIMER_KEY = '__siteSearchModalRetryTimer';
 
     function clearRetryTimer() {
@@ -165,8 +162,8 @@
       const onDialogClick = (event) => {
         if (event.target === dialog) closeSearchModal();
       };
-      const onDialogCancel = () => setModalOpenState(false);
       const onDialogClose = () => setModalOpenState(false);
+      const onDialogCancel = onDialogClose;
 
       window[SEARCH_CLOSE_HANDLER_KEY] = onCloseClick;
       window[SEARCH_CLICK_HANDLER_KEY] = onDialogClick;
@@ -179,20 +176,7 @@
       dialog.addEventListener('close', onDialogClose);
     }
 
-    function bindAfterSwap() {
-      if (typeof window[SEARCH_AFTER_SWAP_HANDLER_KEY] === 'function') {
-        document.removeEventListener('astro:after-swap', window[SEARCH_AFTER_SWAP_HANDLER_KEY]);
-      }
-
-      const onAfterSwap = () => {
-        bindDialogInteractions();
-      };
-      window[SEARCH_AFTER_SWAP_HANDLER_KEY] = onAfterSwap;
-      document.addEventListener('astro:after-swap', onAfterSwap);
-    }
-
     bindOpenListener();
     bindDialogInteractions();
-    bindAfterSwap();
   })();
 </script>
