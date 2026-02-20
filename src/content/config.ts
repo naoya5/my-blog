@@ -1,5 +1,7 @@
 import { defineCollection, z } from 'astro:content';
 
+const ALLOWED_EXTERNAL_IMAGE_HOSTS = new Set(['images.unsplash.com']);
+
 const blog = defineCollection({
   type: 'content',
   schema: ({ image }) =>
@@ -13,9 +15,32 @@ const blog = defineCollection({
           image(),
           z
             .string()
-            .url()
-            .refine((url) => url.startsWith('https://'), {
-              message: 'heroImage URL must start with https://',
+            .superRefine((value, ctx) => {
+              let parsedUrl: URL;
+              try {
+                parsedUrl = new URL(value);
+              } catch {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: 'heroImage external URL must be an absolute URL',
+                });
+                return;
+              }
+
+              if (parsedUrl.protocol !== 'https:') {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: 'heroImage URL must start with https://',
+                });
+              }
+
+              const hostname = parsedUrl.hostname.toLowerCase();
+              if (!ALLOWED_EXTERNAL_IMAGE_HOSTS.has(hostname)) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: 'heroImage URL host is not allowed',
+                });
+              }
             }),
         ])
         .optional(),

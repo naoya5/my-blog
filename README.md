@@ -87,14 +87,15 @@ title: "記事タイトル"
 description: "記事の説明"
 pubDate: 2026-02-13
 updatedDate: 2026-02-13
-heroImage: "./images/hero.jpg" # または https://... の外部URL
+heroImage: "./images/hero.jpg" # または https://images.unsplash.com/... の外部URL
 tags: ["astro", "tailwind"]
 draft: false
 ---
 ```
 
 `draft: true` は本番ビルドで除外されます。
-外部URL画像を使う場合は `astro.config.mjs` の `image.domains` 設定が必要です。
+外部URL画像を使う場合は `src/content/config.ts` の許可ホストに含まれるURLを使用してください
+（現状は `images.unsplash.com` のみ許可）。
 
 ## デプロイ
 
