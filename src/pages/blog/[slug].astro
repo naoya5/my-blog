@@ -49,6 +49,9 @@ const schema = {
     },
   ],
 };
+
+// Prevent closing the script tag when serializing untrusted text fields.
+const schemaJson = JSON.stringify(schema).replace(/</g, '\\u003c');
 ---
 
 <BaseLayout
@@ -60,7 +63,7 @@ const schema = {
   modifiedTime={post.data.updatedDate}
   tags={post.data.tags}
 >
-  <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
+  <script type="application/ld+json" is:inline set:html={schemaJson} />
 
   <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px]">
     <div>
