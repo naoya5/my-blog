@@ -26,7 +26,7 @@ interface Props {
 const { tag, posts } = Astro.props as Props;
 ---
 
-<BaseLayout title={`タグ: ${tag} | Signal & Sprocket`} description={`#${tag} が付いた記事一覧です。`}>
+<BaseLayout title={`タグ: ${tag} | Agentic Signal`} description={`#${tag} が付いた記事一覧です。`}>
   <section class="mb-8">
     <h1 class="text-4xl">タグ: #{tag}</h1>
     <p class="mt-3 text-sm opacity-80">{posts.length} 件の記事があります。</p>

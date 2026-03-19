@@ -3,7 +3,8 @@ title: "LangChain DeepAgent実践ガイド: 単発LLMから継続実行エージ
 description: "LangChainのDeepAgentを題材に、アーキテクチャ、状態管理、ツール実行、評価設計、運用までを長文で整理した実践ノート。"
 pubDate: "2026-02-16"
 updatedDate: "2026-02-16"
-tags: ["langchain", "deepagent", "agent", "llm", "python"]
+tags: ["langchain", "agents", "tutorial"]
+category: "deep-dive"
 draft: false
 ---
 

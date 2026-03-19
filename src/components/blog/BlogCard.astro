@@ -44,7 +44,7 @@ const heroImage = post.data.heroImage;
           {formatDate(post.data.pubDate)}
         </time>
         <span class="h-1 w-1 rounded-full bg-slate-300"></span>
-        <span class="text-brand-600 dark:text-brand-400">Article</span>
+        <span class="text-brand-600 dark:text-brand-400">{post.data.category === 'daily' ? 'Daily Signal' : 'Deep Dive'}</span>
       </div>
       
       <h3 class="mt-4 text-2xl font-black leading-tight tracking-tight transition-colors group-hover:text-brand-600 dark:group-hover:text-brand-400" style="font-family: var(--font-display);">

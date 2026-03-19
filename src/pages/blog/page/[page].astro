@@ -17,7 +17,7 @@ export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
 const { page } = Astro.props as { page: Page<BlogPost> };
 ---
 
-<BaseLayout title={`Archive ${page.currentPage} | Signal & Sprocket`} description="記事のページネーション一覧です。">
+<BaseLayout title={`Archive ${page.currentPage} | Agentic Signal`} description="記事のページネーション一覧です。">
   <section class="mb-8 flex items-end justify-between gap-4">
     <div>
       <h1 class="text-4xl">Archive</h1>

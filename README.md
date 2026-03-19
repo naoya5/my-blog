@@ -1,4 +1,4 @@
-# Signal & Sprocket
+# Agentic Signal
 
 Astro 5 で構築した、静的配信向けの技術ブログ実装です。  
 「速く、壊れにくく、運用しやすい」ブログをテーマに、コンテンツ管理から検索・配信までを一通り実装しています。
@@ -120,6 +120,7 @@ pnpm deploy
 - `CLOUDFLARE_ACCOUNT_ID`
 
 補足:
+
 - Cloudflare Pages の Git 連携も有効にしている場合、二重デプロイになります。どちらか一方に統一してください。
 
 ## 公開前に変更する設定
