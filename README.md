@@ -123,6 +123,44 @@ pnpm deploy
 
 - Cloudflare Pages の Git 連携も有効にしている場合、二重デプロイになります。どちらか一方に統一してください。
 
+## Notion 連携（記事の自動取り込み）
+
+Notion を編集起点にする場合は、`scripts/notion-sync.mjs` で `src/content/blog/*.md` を自動生成できます。
+
+### 1. GitHub Secrets を登録
+
+リポジトリの `Settings > Secrets and variables > Actions` に以下を追加します。
+
+- `NOTION_TOKEN`: Notion Integration の Internal Integration Token
+- `NOTION_DATABASE_ID`: 記事管理DBのID（32文字）
+
+### 2. Notion DB プロパティを作成
+
+以下のプロパティ名をそのまま使ってください。
+
+- `Title` (title)
+- `Slug` (rich_text)
+- `Description` (rich_text)
+- `Tags` (multi_select)
+- `HeroImage` (url, 任意)
+- `Status` (select: `Idea` / `Writing` / `Review` / `Scheduled` / `Published`)
+- `Draft` (checkbox)
+- `PublishAt` (date)
+
+### 3. ローカル同期テスト
+
+```bash
+NOTION_TOKEN=xxx NOTION_DATABASE_ID=xxx pnpm notion:sync:dry-run
+```
+
+問題なければ本実行:
+
+```bash
+NOTION_TOKEN=xxx NOTION_DATABASE_ID=xxx pnpm notion:sync
+```
+
+`Status=Scheduled` かつ `PublishAt <= 現在時刻` のページだけが対象です。
+
 ## 公開前に変更する設定
 
 - `astro.config.mjs` の `site` は現在 `https://example.com` です

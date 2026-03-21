@@ -9,6 +9,8 @@
     "build": "astro check && astro build && pagefind --site dist",
     "preview": "astro preview",
     "deploy": "pnpm build && wrangler pages deploy ./dist",
+    "notion:sync": "node scripts/notion-sync.mjs",
+    "notion:sync:dry-run": "node scripts/notion-sync.mjs --dry-run",
     "astro": "astro"
   },
   "dependencies": {
