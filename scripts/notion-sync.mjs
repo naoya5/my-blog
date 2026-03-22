@@ -13,9 +13,10 @@ function env(name) {
   return value;
 }
 
-function toJstNow() {
-  const now = new Date();
-  return new Date(now.toLocaleString("en-US", { timeZone: "Asia/Tokyo" }));
+function toJstNow(baseDate = new Date()) {
+  const utcMs = baseDate.getTime() + baseDate.getTimezoneOffset() * 60 * 1000;
+  const jstMs = utcMs + 9 * 60 * 60 * 1000;
+  return new Date(jstMs);
 }
 
 function toDateOnly(value) {
@@ -59,7 +60,11 @@ function richTextToString(arr = []) {
 }
 
 function escapeYamlSingleQuoted(str) {
-  return (str || "").replace(/'/g, "''");
+  return String(str ?? "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\n/g, "\\n")
+    .replace(/\\/g, "\\\\")
+    .replace(/'/g, "''");
 }
 
 function extractPageFields(page) {
@@ -139,6 +144,25 @@ async function fetchAllBlocks(token, blockId) {
   return all;
 }
 
+async function fetchAllDatabasePages(token, databaseId, queryBody) {
+  let cursor;
+  const all = [];
+
+  do {
+    const data = await notionFetch(token, `/databases/${databaseId}/query`, {
+      method: "POST",
+      body: JSON.stringify({
+        ...queryBody,
+        ...(cursor ? { start_cursor: cursor } : {}),
+      }),
+    });
+    all.push(...(data.results || []));
+    cursor = data.has_more ? data.next_cursor : undefined;
+  } while (cursor);
+
+  return all;
+}
+
 async function blocksToMarkdown(token, blockId, depth = 0) {
   const blocks = await fetchAllBlocks(token, blockId);
   const lines = [];
@@ -156,12 +180,12 @@ async function blocksToMarkdown(token, blockId, depth = 0) {
   return lines.join("\n\n");
 }
 
-function shouldPublish(fields, nowJst) {
+function shouldPublish(fields, now) {
   if (fields.status !== "Scheduled") return false;
   if (!fields.publishAt) return false;
   const scheduled = new Date(fields.publishAt);
   if (Number.isNaN(scheduled.getTime())) return false;
-  return scheduled <= nowJst;
+  return scheduled <= now;
 }
 
 async function writePostFile({ slug, frontmatter, body, dryRun }) {
@@ -196,24 +220,22 @@ async function main() {
 
   await mkdir(CONTENT_DIR, { recursive: true });
 
-  const nowJst = toJstNow();
-  const pages = await notionFetch(notionToken, `/databases/${notionDatabaseId}/query`, {
-    method: "POST",
-    body: JSON.stringify({
-      page_size: 100,
-      filter: {
-        and: [
-          { property: "Status", select: { equals: "Scheduled" } },
-          { property: "PublishAt", date: { on_or_before: new Date().toISOString() } },
-        ],
-      },
-      sorts: [{ property: "PublishAt", direction: "ascending" }],
-    }),
+  const now = new Date();
+  const nowJst = toJstNow(now);
+  const pages = await fetchAllDatabasePages(notionToken, notionDatabaseId, {
+    page_size: 100,
+    filter: {
+      and: [
+        { property: "Status", select: { equals: "Scheduled" } },
+        { property: "PublishAt", date: { on_or_before: now.toISOString() } },
+      ],
+    },
+    sorts: [{ property: "PublishAt", direction: "ascending" }],
   });
 
-  const targets = (pages.results || [])
+  const targets = pages
     .map((page) => ({ page, fields: extractPageFields(page) }))
-    .filter(({ fields }) => fields.title && fields.slug && shouldPublish(fields, nowJst));
+    .filter(({ fields }) => fields.title && fields.slug && shouldPublish(fields, now));
 
   if (targets.length === 0) {
     console.log("No publishable pages found.");

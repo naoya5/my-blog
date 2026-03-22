@@ -29,7 +29,7 @@
 
 ## 設定方法
 
-## 1. GitHub Secrets を登録
+### 1. GitHub Secrets を登録
 
 `Settings > Secrets and variables > Actions` に以下を登録します。
 
@@ -37,7 +37,7 @@
 - `NOTION_DATABASE_ID`（必須）: Notion DB ID
 - `DISCORD_WEBHOOK_URL`（任意）: 失敗通知用 Webhook URL
 
-## 2. Notion 側の DB プロパティを作成
+### 2. Notion 側の DB プロパティを作成
 
 プロパティ名は以下に合わせてください。
 
@@ -50,7 +50,7 @@
 - `Draft` (checkbox)
 - `PublishAt` (date)
 
-## 2.1 Notion DBテンプレートを作る手順（初期プロパティ入り）
+#### 2.1 Notion DBテンプレートを作る手順（初期プロパティ入り）
 
 1. Notion で新規データベースを作成
 
@@ -101,14 +101,14 @@
 - `NOTION_TOKEN` を発行した Integration をこのDBに `Invite` します。
 - これを忘れると同期APIが権限エラーになります。
 
-## 3. ローカル確認（任意）
+### 3. ローカル確認（任意）
 
 ```bash
 NOTION_TOKEN=xxx NOTION_DATABASE_ID=xxx pnpm notion:sync:dry-run
 NOTION_TOKEN=xxx NOTION_DATABASE_ID=xxx pnpm notion:sync
 ```
 
-## 4. GitHub Actions を有効化
+### 4. GitHub Actions を有効化
 
 - `.github/workflows/notion-sync.yml` がデフォルトで有効です。
 - 定期実行は 10分ごとです。
