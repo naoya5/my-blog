@@ -109,8 +109,7 @@ NOTION_TOKEN=xxx NOTION_DATA_SOURCE_ID=xxx pnpm notion:sync:dry-run
 NOTION_TOKEN=xxx NOTION_DATA_SOURCE_ID=xxx pnpm notion:sync
 ```
 
-`NOTION_DATABASE_ID` を使う場合は、対象DBを Integration に共有（Invite）してください。  
-`object_not_found` エラー時は ID の種類（Database ID / Data Source ID）と共有設定を確認します。
+`NOTION_DATABASE_ID` を使う場合は、対象DBを Integration に共有（Invite）してください。`object_not_found` エラー時は ID の種類（Database ID / Data Source ID）と共有設定を確認します。
 
 ### 4. GitHub Actions を有効化
 
