@@ -4,7 +4,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const NOTION_API_VERSION = "2026-03-11";
-const NOTION_LEGACY_DATABASE_API_VERSION = "2022-06-28";
+const NOTION_LEGACY_DATABASE_API_VERSION = "2026-03-11";
 const NOTION_API_BASE = "https://api.notion.com/v1";
 const CONTENT_DIR = path.join(process.cwd(), "src", "content", "blog");
 
@@ -121,6 +121,12 @@ function isNotionNotFoundError(err) {
   return err instanceof NotionApiError && err.status === 404 && err.code === "object_not_found";
 }
 
+function readDatabaseDataSources(database) {
+  if (Array.isArray(database?.dataSources)) return database.dataSources;
+  if (Array.isArray(database?.data_sources)) return database.data_sources;
+  return null;
+}
+
 async function resolveDataSourceId(token, databaseOrDataSourceIdRaw) {
   const id = normalizeNotionId(databaseOrDataSourceIdRaw);
   if (!id) {
@@ -141,10 +147,29 @@ async function resolveDataSourceId(token, databaseOrDataSourceIdRaw) {
       { notionVersion: NOTION_LEGACY_DATABASE_API_VERSION },
     );
 
-    const dataSourceId = database?.data_sources?.[0]?.id;
+    const dataSources = readDatabaseDataSources(database);
+    if (!dataSources) {
+      throw new Error(
+        `Database ${id} response does not include data sources (dataSources/data_sources).`,
+      );
+    }
+
+    if (dataSources.length === 0) {
+      throw new Error(
+        `Database ${id} has no data sources. Set NOTION_DATA_SOURCE_ID explicitly if needed.`,
+      );
+    }
+
+    if (dataSources.length !== 1) {
+      throw new Error(
+        `Database ${id} has multiple data sources (${dataSources.length}). Set NOTION_DATA_SOURCE_ID explicitly.`,
+      );
+    }
+
+    const dataSourceId = dataSources[0]?.id;
     if (!dataSourceId) {
       throw new Error(
-        `Database ${id} was found, but no data source is available for querying. Check your Notion database setup.`,
+        `Database ${id} returned a data source entry without id. Set NOTION_DATA_SOURCE_ID explicitly.`,
       );
     }
 
