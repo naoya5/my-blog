@@ -66,12 +66,16 @@ jobs:
         run: echo "No scheduled Notion posts to publish."
 
       - name: Notify Discord on failure
-        if: failure() && env.DISCORD_WEBHOOK_URL != ''
+        if: failure()
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         shell: bash
         run: |
           set -euo pipefail
+          if [ -z "${DISCORD_WEBHOOK_URL:-}" ]; then
+            echo "DISCORD_WEBHOOK_URL is empty. Skip Discord notification."
+            exit 0
+          fi
           payload=$(cat <<'JSON'
           {
             "content": "[ALERT] notion-sync failed\nRepository: ${{ github.repository }}\nWorkflow: ${{ github.workflow }}\nRun: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
