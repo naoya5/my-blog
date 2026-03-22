@@ -1,0 +1,87 @@
+name: Sync Scheduled Posts from Notion
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: notion-sync-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install pnpm (without Corepack)
+        run: npm install -g pnpm@9.15.5
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Sync articles from Notion
+        run: pnpm notion:sync
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+
+      - name: Detect content changes
+        id: changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$(git status --porcelain --untracked-files=normal -- src/content/blog)" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit synced content
+        if: steps.changes.outputs.changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/content/blog
+          git commit -m "chore(content): sync scheduled posts from Notion"
+          git push
+
+      - name: No changes summary
+        if: steps.changes.outputs.changed != 'true'
+        run: echo "No scheduled Notion posts to publish."
+
+      - name: Notify Discord on failure
+        if: failure()
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${DISCORD_WEBHOOK_URL:-}" ]; then
+            echo "DISCORD_WEBHOOK_URL is empty. Skip Discord notification."
+            exit 0
+          fi
+          payload=$(cat <<'JSON'
+          {
+            "content": "[ALERT] notion-sync failed\nRepository: ${{ github.repository }}\nWorkflow: ${{ github.workflow }}\nRun: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          }
+          JSON
+          )
+          curl -sS -X POST "$DISCORD_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d "$payload"
