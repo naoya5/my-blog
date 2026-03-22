@@ -5,20 +5,25 @@
 ## できるようになったこと
 
 1. Notion 記事の自動取り込み
+
 - `scripts/notion-sync.mjs` が Notion DB を読み取り、`src/content/blog/*.md` を生成します。
 - 対象は `Status=Scheduled` かつ `PublishAt <= 現在時刻` のページです。
 
-2. 定期同期と手動同期
+1. 定期同期と手動同期
+
 - `.github/workflows/notion-sync.yml` で 10分ごとに自動同期します（`schedule`）。
 - GitHub Actions から手動実行も可能です（`workflow_dispatch`）。
 
-3. 変更があるときだけ自動コミット
+1. 変更があるときだけ自動コミット
+
 - 同期後に `src/content/blog` 配下へ差分がある場合のみ、GitHub Actions が自動コミットします。
 
-4. 既存デプロイへの自動接続
+1. 既存デプロイへの自動接続
+
 - 自動コミットが `main` に反映されると、既存の `deploy-content-to-cloudflare.yml` が動き、Cloudflare Pages に配信されます。
 
-5. notion-sync 失敗時の Discord 通知
+1. notion-sync 失敗時の Discord 通知
+
 - `DISCORD_WEBHOOK_URL` が設定されている場合、`notion-sync` ジョブ失敗時に Discord へ通知します。
 - 通知には Actions の実行URLが含まれます。
 
@@ -48,9 +53,11 @@
 ## 2.1 Notion DBテンプレートを作る手順（初期プロパティ入り）
 
 1. Notion で新規データベースを作成
+
 - `Table - Full page` を選び、名前を `Blog Posts` などにします。
 
-2. 必須プロパティを追加
+1. 必須プロパティを追加
+
 - 下記を「名前そのまま」で作成します（型も一致させます）。
 - `Title` (title)
 - `Slug` (rich_text)
@@ -61,14 +68,16 @@
 - `Draft` (checkbox)
 - `PublishAt` (date)
 
-3. `Status` の選択肢を設定
+1. `Status` の選択肢を設定
+
 - `Idea`
 - `Writing`
 - `Review`
 - `Scheduled`
 - `Published`
 
-4. ページテンプレートを作成
+1. ページテンプレートを作成
+
 - DB右上 `New` の横 `▼` から `+ New template` を選択。
 - テンプレート名を `Blog Post Template` にします。
 - 本文に以下の見出しを置いておくと運用しやすいです。
@@ -76,16 +85,19 @@
   - `# 本文`
   - `# 参考リンク`
 
-5. テンプレートの初期値を設定
+1. テンプレートの初期値を設定
+
 - `Status`: `Writing`
 - `Draft`: `true`
 - `PublishAt`: 公開予定日時を都度設定（未定なら空でOK）
 
-6. ビューを2つ作成（任意だけど推奨）
+1. ビューを2つ作成（任意だけど推奨）
+
 - `Editorial`: `Status != Published` を表示
 - `Ready to Publish`: `Status = Scheduled` かつ `PublishAt` あり
 
-7. Integration をDBに接続
+1. Integration をDBに接続
+
 - `NOTION_TOKEN` を発行した Integration をこのDBに `Invite` します。
 - これを忘れると同期APIが権限エラーになります。
 
