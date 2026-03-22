@@ -45,6 +45,50 @@
 - `Draft` (checkbox)
 - `PublishAt` (date)
 
+## 2.1 Notion DBテンプレートを作る手順（初期プロパティ入り）
+
+1. Notion で新規データベースを作成
+- `Table - Full page` を選び、名前を `Blog Posts` などにします。
+
+2. 必須プロパティを追加
+- 下記を「名前そのまま」で作成します（型も一致させます）。
+- `Title` (title)
+- `Slug` (rich_text)
+- `Description` (rich_text)
+- `Tags` (multi_select)
+- `HeroImage` (url)
+- `Status` (select)
+- `Draft` (checkbox)
+- `PublishAt` (date)
+
+3. `Status` の選択肢を設定
+- `Idea`
+- `Writing`
+- `Review`
+- `Scheduled`
+- `Published`
+
+4. ページテンプレートを作成
+- DB右上 `New` の横 `▼` から `+ New template` を選択。
+- テンプレート名を `Blog Post Template` にします。
+- 本文に以下の見出しを置いておくと運用しやすいです。
+  - `# 概要`
+  - `# 本文`
+  - `# 参考リンク`
+
+5. テンプレートの初期値を設定
+- `Status`: `Writing`
+- `Draft`: `true`
+- `PublishAt`: 公開予定日時を都度設定（未定なら空でOK）
+
+6. ビューを2つ作成（任意だけど推奨）
+- `Editorial`: `Status != Published` を表示
+- `Ready to Publish`: `Status = Scheduled` かつ `PublishAt` あり
+
+7. Integration をDBに接続
+- `NOTION_TOKEN` を発行した Integration をこのDBに `Invite` します。
+- これを忘れると同期APIが権限エラーになります。
+
 ## 3. ローカル確認（任意）
 
 ```bash
