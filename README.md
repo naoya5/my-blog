@@ -161,6 +161,16 @@ NOTION_TOKEN=xxx NOTION_DATABASE_ID=xxx pnpm notion:sync
 
 `Status=Scheduled` かつ `PublishAt <= 現在時刻` のページだけが対象です。
 
+### 4. GitHub Actions で自動同期
+
+`.github/workflows/notion-sync.yml` により、以下で同期が実行されます。
+
+- 定期実行: 10分ごと（`schedule`）
+- 手動実行: `workflow_dispatch`
+
+同期で `src/content/blog` に変更があった場合のみ自動コミットされ、既存の
+`deploy-content-to-cloudflare.yml` が反応してデプロイされます。
+
 ## 公開前に変更する設定
 
 - `astro.config.mjs` の `site` は現在 `https://example.com` です
