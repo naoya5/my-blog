@@ -37,6 +37,7 @@ jobs:
         run: pnpm notion:sync
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATA_SOURCE_ID: ${{ secrets.NOTION_DATA_SOURCE_ID }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
 
       - name: Detect content changes

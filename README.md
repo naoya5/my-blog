@@ -133,7 +133,8 @@ Notion を編集起点にする場合は、`scripts/notion-sync.mjs` で `src/co
 リポジトリの `Settings > Secrets and variables > Actions` に以下を追加します。
 
 - `NOTION_TOKEN`: Notion Integration の Internal Integration Token
-- `NOTION_DATABASE_ID`: 記事管理DBのID（32文字）
+- `NOTION_DATA_SOURCE_ID`: 記事管理の Data Source ID（推奨）
+- `NOTION_DATABASE_ID`: 記事管理DBのID（従来方式。`NOTION_DATA_SOURCE_ID` 未設定時に使用）
 - `DISCORD_WEBHOOK_URL`: notion-sync 失敗通知のWebhook URL（任意）
 
 ### 2. Notion DB プロパティを作成
@@ -152,16 +153,19 @@ Notion を編集起点にする場合は、`scripts/notion-sync.mjs` で `src/co
 ### 3. ローカル同期テスト
 
 ```bash
-NOTION_TOKEN=xxx NOTION_DATABASE_ID=xxx pnpm notion:sync:dry-run
+NOTION_TOKEN=xxx NOTION_DATA_SOURCE_ID=xxx pnpm notion:sync:dry-run
 ```
 
 問題なければ本実行:
 
 ```bash
-NOTION_TOKEN=xxx NOTION_DATABASE_ID=xxx pnpm notion:sync
+NOTION_TOKEN=xxx NOTION_DATA_SOURCE_ID=xxx pnpm notion:sync
 ```
 
 `Status=Scheduled` かつ `PublishAt <= 現在時刻` のページだけが対象です。
+
+`NOTION_DATABASE_ID` を使う場合は、対象DBを Integration に共有（Invite）してください。  
+`object_not_found` エラー時は ID の種類（Database ID / Data Source ID）と共有設定を確認してください。
 
 ### 4. GitHub Actions で自動同期
 
