@@ -133,6 +133,7 @@ Notion を編集起点にする場合は、`scripts/notion-sync.mjs` で `src/co
 
 - `NOTION_TOKEN`: Notion Integration の Internal Integration Token
 - `NOTION_DATABASE_ID`: 記事管理DBのID（32文字）
+- `DISCORD_WEBHOOK_URL`: notion-sync 失敗通知のWebhook URL（任意）
 
 ### 2. Notion DB プロパティを作成
 
