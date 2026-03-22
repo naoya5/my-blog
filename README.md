@@ -126,6 +126,7 @@ pnpm deploy
 ## Notion 連携（記事の自動取り込み）
 
 Notion を編集起点にする場合は、`scripts/notion-sync.mjs` で `src/content/blog/*.md` を自動生成できます。
+運用全体のまとめは `NOTION_AUTOMATION_GUIDE.md` を参照してください。
 
 ### 1. GitHub Secrets を登録
 
