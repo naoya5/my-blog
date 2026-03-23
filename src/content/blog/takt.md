@@ -4,7 +4,7 @@ description: 'Taktの導入に関する記事'
 pubDate: 2026-03-23
 updatedDate: 2026-03-23
 tags: ['AI']
-draft: true
+draft: false
 ---
 
 # 概要
