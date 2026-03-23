@@ -34,7 +34,8 @@
 `Settings > Secrets and variables > Actions` に以下を登録します。
 
 - `NOTION_TOKEN`（必須）: Notion Integration Token
-- `NOTION_DATABASE_ID`（必須）: Notion DB ID
+- `NOTION_DATA_SOURCE_ID`（推奨）: Notion Data Source ID
+- `NOTION_DATABASE_ID`（従来方式）: Notion DB ID（`NOTION_DATA_SOURCE_ID` 未設定時に使用）
 - `DISCORD_WEBHOOK_URL`（任意）: 失敗通知用 Webhook URL
 
 ### 2. Notion 側の DB プロパティを作成
@@ -104,9 +105,11 @@
 ### 3. ローカル確認（任意）
 
 ```bash
-NOTION_TOKEN=xxx NOTION_DATABASE_ID=xxx pnpm notion:sync:dry-run
-NOTION_TOKEN=xxx NOTION_DATABASE_ID=xxx pnpm notion:sync
+NOTION_TOKEN=xxx NOTION_DATA_SOURCE_ID=xxx pnpm notion:sync:dry-run
+NOTION_TOKEN=xxx NOTION_DATA_SOURCE_ID=xxx pnpm notion:sync
 ```
+
+`NOTION_DATABASE_ID` を使う場合は、対象DBを Integration に共有（Invite）してください。`object_not_found` エラー時は ID の種類（Database ID / Data Source ID）と共有設定を確認します。
 
 ### 4. GitHub Actions を有効化
 

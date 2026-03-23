@@ -1,7 +1,6 @@
 # Agentic Signal
 
-Astro 5 で構築した、静的配信向けの技術ブログ実装です。  
-「速く、壊れにくく、運用しやすい」ブログをテーマに、コンテンツ管理から検索・配信までを一通り実装しています。
+Astro 5 で構築した、静的配信向けの技術ブログ実装です。「速く、壊れにくく、運用しやすい」ブログをテーマに、コンテンツ管理から検索・配信までを一通り実装しています。
 
 ## このリポジトリで分かること
 
@@ -78,8 +77,7 @@ pnpm --version
 
 ## コンテンツ運用
 
-記事は `src/content/blog/` 配下の Markdown で管理します。  
-frontmatter は `src/content/config.ts` のスキーマで検証されます。
+記事は `src/content/blog/` 配下の Markdown で管理します。frontmatter は `src/content/config.ts` のスキーマで検証されます。
 
 ```md
 ---
@@ -93,9 +91,7 @@ draft: false
 ---
 ```
 
-`draft: true` は本番ビルドで除外されます。
-外部URL画像を使う場合は `src/content/config.ts` の許可ホストに含まれるURLを使用してください
-（現状は `images.unsplash.com` のみ許可）。
+`draft: true` は本番ビルドで除外されます。外部URL画像を使う場合は `src/content/config.ts` の許可ホストに含まれるURLを使用してください（現状は `images.unsplash.com` のみ許可）。
 
 ## デプロイ
 
@@ -125,15 +121,15 @@ pnpm deploy
 
 ## Notion 連携（記事の自動取り込み）
 
-Notion を編集起点にする場合は、`scripts/notion-sync.mjs` で `src/content/blog/*.md` を自動生成できます。
-運用全体のまとめは `NOTION_AUTOMATION_GUIDE.md` を参照してください。
+Notion を編集起点にする場合は、`scripts/notion-sync.mjs` で `src/content/blog/*.md` を自動生成できます。運用全体のまとめは `NOTION_AUTOMATION_GUIDE.md` を参照してください。
 
 ### 1. GitHub Secrets を登録
 
 リポジトリの `Settings > Secrets and variables > Actions` に以下を追加します。
 
 - `NOTION_TOKEN`: Notion Integration の Internal Integration Token
-- `NOTION_DATABASE_ID`: 記事管理DBのID（32文字）
+- `NOTION_DATA_SOURCE_ID`: 記事管理の Data Source ID（推奨）
+- `NOTION_DATABASE_ID`: 記事管理DBのID（従来方式。`NOTION_DATA_SOURCE_ID` 未設定時に使用）
 - `DISCORD_WEBHOOK_URL`: notion-sync 失敗通知のWebhook URL（任意）
 
 ### 2. Notion DB プロパティを作成
@@ -152,16 +148,18 @@ Notion を編集起点にする場合は、`scripts/notion-sync.mjs` で `src/co
 ### 3. ローカル同期テスト
 
 ```bash
-NOTION_TOKEN=xxx NOTION_DATABASE_ID=xxx pnpm notion:sync:dry-run
+NOTION_TOKEN=xxx NOTION_DATA_SOURCE_ID=xxx pnpm notion:sync:dry-run
 ```
 
 問題なければ本実行:
 
 ```bash
-NOTION_TOKEN=xxx NOTION_DATABASE_ID=xxx pnpm notion:sync
+NOTION_TOKEN=xxx NOTION_DATA_SOURCE_ID=xxx pnpm notion:sync
 ```
 
 `Status=Scheduled` かつ `PublishAt <= 現在時刻` のページだけが対象です。
+
+`NOTION_DATABASE_ID` を使う場合は、対象DBを Integration に共有（Invite）してください。`object_not_found` エラー時は ID の種類（Database ID / Data Source ID）と共有設定を確認してください。
 
 ### 4. GitHub Actions で自動同期
 
@@ -170,8 +168,7 @@ NOTION_TOKEN=xxx NOTION_DATABASE_ID=xxx pnpm notion:sync
 - 定期実行: 10分ごと（`schedule`）
 - 手動実行: `workflow_dispatch`
 
-同期で `src/content/blog` に変更があった場合のみ自動コミットされ、既存の
-`deploy-content-to-cloudflare.yml` が反応してデプロイされます。
+同期で `src/content/blog` に変更があった場合のみ自動コミットされ、既存の`deploy-content-to-cloudflare.yml` が反応してデプロイされます。
 
 ## 公開前に変更する設定
 

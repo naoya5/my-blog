@@ -3,14 +3,35 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-const NOTION_API_VERSION = "2022-06-28";
+const NOTION_API_VERSION = "2026-03-11";
+const NOTION_LEGACY_DATABASE_API_VERSION = "2026-03-11";
 const NOTION_API_BASE = "https://api.notion.com/v1";
 const CONTENT_DIR = path.join(process.cwd(), "src", "content", "blog");
+
+class NotionApiError extends Error {
+  constructor({ status, code, message, detail, endpoint }) {
+    super(message);
+    this.name = "NotionApiError";
+    this.status = status;
+    this.code = code;
+    this.detail = detail;
+    this.endpoint = endpoint;
+  }
+}
 
 function env(name) {
   const value = process.env[name];
   if (!value) throw new Error(`Missing required env: ${name}`);
   return value;
+}
+
+function envAny(names) {
+  for (const name of names) {
+    const value = process.env[name];
+    if (value) return value;
+  }
+
+  throw new Error(`Missing required env: one of ${names.join(" / ")}`);
 }
 
 function toJstNow(baseDate = new Date()) {
@@ -37,22 +58,133 @@ function slugify(input) {
 }
 
 async function notionFetch(token, endpoint, init = {}) {
+  const notionVersion = init.notionVersion || NOTION_API_VERSION;
+  const { notionVersion: _ignored, ...requestInit } = init;
+
   const res = await fetch(`${NOTION_API_BASE}${endpoint}`, {
-    ...init,
+    ...requestInit,
     headers: {
       Authorization: `Bearer ${token}`,
-      "Notion-Version": NOTION_API_VERSION,
+      "Notion-Version": notionVersion,
       "Content-Type": "application/json",
-      ...(init.headers || {}),
+      ...(requestInit.headers || {}),
     },
   });
 
   if (!res.ok) {
-    const detail = await res.text();
-    throw new Error(`Notion API error ${res.status}: ${detail}`);
+    const detailText = await res.text();
+
+    try {
+      const detail = detailText ? JSON.parse(detailText) : null;
+      const code = detail?.code;
+      const message = detail?.message || detailText || "Unknown Notion API error";
+
+      throw new NotionApiError({
+        status: res.status,
+        code,
+        detail,
+        endpoint,
+        message: `Notion API error ${res.status}${code ? ` (${code})` : ""}: ${message}`,
+      });
+    } catch (parseErr) {
+      if (parseErr instanceof NotionApiError) throw parseErr;
+      throw new Error(`Notion API error ${res.status}: ${detailText}`);
+    }
   }
 
   return res.json();
+}
+
+function normalizeNotionId(input) {
+  const raw = String(input || "").trim();
+  if (!raw) return "";
+
+  const candidates = [raw];
+  try {
+    const url = new URL(raw);
+    candidates.push(url.pathname, decodeURIComponent(url.pathname));
+  } catch {
+    // plain id/string
+  }
+
+  const idRegex = /([0-9a-f]{32}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
+
+  for (const candidate of candidates) {
+    const match = candidate.match(idRegex);
+    if (match?.[1]) return match[1].toLowerCase();
+  }
+
+  return raw;
+}
+
+function isNotionNotFoundError(err) {
+  return err instanceof NotionApiError && err.status === 404 && err.code === "object_not_found";
+}
+
+function readDatabaseDataSources(database) {
+  if (Array.isArray(database?.dataSources)) return database.dataSources;
+  if (Array.isArray(database?.data_sources)) return database.data_sources;
+  return null;
+}
+
+async function resolveDataSourceId(token, databaseOrDataSourceIdRaw) {
+  const id = normalizeNotionId(databaseOrDataSourceIdRaw);
+  if (!id) {
+    throw new Error("NOTION_DATABASE_ID / NOTION_DATA_SOURCE_ID is empty or invalid.");
+  }
+
+  try {
+    await notionFetch(token, `/data_sources/${id}`);
+    return id;
+  } catch (err) {
+    if (!isNotionNotFoundError(err)) throw err;
+  }
+
+  try {
+    const database = await notionFetch(
+      token,
+      `/databases/${id}`,
+      { notionVersion: NOTION_LEGACY_DATABASE_API_VERSION },
+    );
+
+    const dataSources = readDatabaseDataSources(database);
+    if (!dataSources) {
+      throw new Error(
+        `Database ${id} response does not include data sources (dataSources/data_sources).`,
+      );
+    }
+
+    if (dataSources.length === 0) {
+      throw new Error(
+        `Database ${id} has no data sources. Set NOTION_DATA_SOURCE_ID explicitly if needed.`,
+      );
+    }
+
+    if (dataSources.length !== 1) {
+      throw new Error(
+        `Database ${id} has multiple data sources (${dataSources.length}). Set NOTION_DATA_SOURCE_ID explicitly.`,
+      );
+    }
+
+    const dataSourceId = dataSources[0]?.id;
+    if (!dataSourceId) {
+      throw new Error(
+        `Database ${id} returned a data source entry without id. Set NOTION_DATA_SOURCE_ID explicitly.`,
+      );
+    }
+
+    return dataSourceId;
+  } catch (err) {
+    if (!isNotionNotFoundError(err)) throw err;
+
+    throw new Error(
+      [
+        `Could not resolve Notion database/data source from: ${databaseOrDataSourceIdRaw}`,
+        "Check that your ID is correct and the database is shared with your integration.",
+        "Tip: you can set NOTION_DATA_SOURCE_ID directly for newer Notion setups.",
+      ].join(" "),
+    );
+  }
 }
 
 function richTextToString(arr = []) {
@@ -144,12 +276,12 @@ async function fetchAllBlocks(token, blockId) {
   return all;
 }
 
-async function fetchAllDatabasePages(token, databaseId, queryBody) {
+async function fetchAllDataSourcePages(token, dataSourceId, queryBody) {
   let cursor;
   const all = [];
 
   do {
-    const data = await notionFetch(token, `/databases/${databaseId}/query`, {
+    const data = await notionFetch(token, `/data_sources/${dataSourceId}/query`, {
       method: "POST",
       body: JSON.stringify({
         ...queryBody,
@@ -216,13 +348,14 @@ async function writePostFile({ slug, frontmatter, body, dryRun }) {
 async function main() {
   const dryRun = process.argv.includes("--dry-run");
   const notionToken = env("NOTION_TOKEN");
-  const notionDatabaseId = env("NOTION_DATABASE_ID");
+  const notionSourceIdRaw = envAny(["NOTION_DATA_SOURCE_ID", "NOTION_DATABASE_ID"]);
+  const notionDataSourceId = await resolveDataSourceId(notionToken, notionSourceIdRaw);
 
   await mkdir(CONTENT_DIR, { recursive: true });
 
   const now = new Date();
   const nowJst = toJstNow(now);
-  const pages = await fetchAllDatabasePages(notionToken, notionDatabaseId, {
+  const pages = await fetchAllDataSourcePages(notionToken, notionDataSourceId, {
     page_size: 100,
     filter: {
       and: [
@@ -274,6 +407,14 @@ async function main() {
 }
 
 main().catch((err) => {
+  if (isNotionNotFoundError(err)) {
+    console.error(err.message || err);
+    console.error(
+      "Hint: confirm NOTION_DATABASE_ID / NOTION_DATA_SOURCE_ID and share the database with your integration.",
+    );
+    process.exit(1);
+  }
+
   console.error(err.message || err);
   process.exit(1);
 });
