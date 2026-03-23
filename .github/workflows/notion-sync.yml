@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: notion-sync-${{ github.ref }}
@@ -66,6 +67,12 @@ jobs:
           # scheduled runs can start from an older SHA when queued; rebase avoids non-fast-forward failures.
           git pull --rebase origin "$branch"
           git push origin "HEAD:$branch"
+
+      - name: Trigger Cloudflare deploy
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy-content-to-cloudflare.yml --ref main
 
       - name: No changes summary
         if: steps.changes.outputs.changed != 'true'
