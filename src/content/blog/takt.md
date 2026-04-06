@@ -2,7 +2,7 @@
 title: 'Takt'
 description: 'Taktの導入に関する記事'
 pubDate: 2026-03-23
-updatedDate: 2026-04-06
+updatedDate: 2026-04-07
 tags: ['AI']
 draft: false
 ---
