@@ -11,13 +11,14 @@ interface Props {
   title: string;
   description?: string;
   image?: string | ImageMetadata;
+  hideFooter?: boolean;
   type?: 'website' | 'article';
   publishedTime?: Date;
   modifiedTime?: Date;
   tags?: string[];
 }
 
-const { title, description, image, type, publishedTime, modifiedTime, tags } = Astro.props;
+const { title, description, image, hideFooter = false, type, publishedTime, modifiedTime, tags } = Astro.props;
 ---
 
 <!doctype html>
@@ -53,7 +54,7 @@ const { title, description, image, type, publishedTime, modifiedTime, tags } = A
       <main class="content-container flex-1 pt-24 pb-12 sm:pt-28 sm:pb-20">
         <slot />
       </main>
-      <Footer />
+      {!hideFooter && <Footer />}
     </div>
   </body>
 </html>

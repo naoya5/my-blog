@@ -1,5 +1,4 @@
 ---
-import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import Tag from '@components/ui/Tag.astro';
 import { formatDate } from '@utils/formatDate';
@@ -9,54 +8,39 @@ interface Props {
 }
 
 const { post } = Astro.props;
-const heroImage = post.data.heroImage;
 ---
 
-<article class="card-surface group flex flex-col overflow-hidden">
-  <a href={`/blog/${post.slug}/`} class="flex flex-col h-full">
-    {heroImage && (
-      <div class="relative aspect-video overflow-hidden">
-        {typeof heroImage === 'string' ? (
-          <img
-            src={heroImage}
-            alt={post.data.title}
-            width="800"
-            height="450"
-            loading="lazy"
-            decoding="async"
-            class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-          />
-        ) : (
-          <Image
-            src={heroImage}
-            alt={post.data.title}
-            width={800}
-            height={450}
-            class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-          />
-        )}
-        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+<article class="list-divider first:border-t-0">
+  <a href={`/blog/${post.slug}/`} class="group block py-4 sm:py-5">
+    <div class="grid gap-2.5 sm:grid-cols-[148px_minmax(0,1fr)] sm:gap-5">
+      <div class="space-y-2 sm:pt-1">
+        <div class="text-[11px] font-semibold uppercase tracking-[0.24em]" style="color: rgb(var(--text-muted));">
+          <time datetime={post.data.pubDate.toISOString()}>
+            {formatDate(post.data.pubDate)}
+          </time>
+        </div>
+        <div class="inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em]" style="border-color: rgb(var(--line)); color: rgb(var(--text-muted));">
+          {post.data.category === 'daily' ? 'Daily Signal' : 'Deep Dive'}
+        </div>
       </div>
-    )}
-    <div class="flex flex-1 flex-col p-6 sm:p-8">
-      <div class="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-slate-500">
-        <time datetime={post.data.pubDate.toISOString()}>
-          {formatDate(post.data.pubDate)}
-        </time>
-        <span class="h-1 w-1 rounded-full bg-slate-300"></span>
-        <span class="text-brand-600 dark:text-brand-400">{post.data.category === 'daily' ? 'Daily Signal' : 'Deep Dive'}</span>
-      </div>
-      
-      <h3 class="mt-4 text-2xl font-black leading-tight tracking-tight transition-colors group-hover:text-brand-600 dark:group-hover:text-brand-400" style="font-family: var(--font-display);">
-        {post.data.title}
-      </h3>
-      
-      <p class="mt-4 line-clamp-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-        {post.data.description}
-      </p>
-      
-      <div class="mt-auto pt-8 flex flex-wrap gap-2">
-        {post.data.tags.slice(0, 3).map((tag) => <Tag name={tag} />)}
+
+      <div class="min-w-0">
+        <div class="flex items-start justify-between gap-4">
+          <h3 class="max-w-3xl text-[1.55rem] leading-[1.38] tracking-tight transition-colors sm:text-[1.85rem] group-hover:text-[rgb(var(--accent))]" style="font-family: var(--font-display);">
+            {post.data.title}
+          </h3>
+          <span class="hidden pt-1 text-base transition-transform duration-200 group-hover:translate-x-1 sm:inline-block" style="color: rgb(var(--text-muted));" aria-hidden="true">
+            →
+          </span>
+        </div>
+
+        <p class="mt-2 max-w-3xl text-sm leading-7 sm:text-base" style="color: rgb(var(--text-muted));">
+          {post.data.description}
+        </p>
+
+        <div class="mt-1 flex flex-wrap gap-x-2 gap-y-1">
+          {post.data.tags.slice(0, 3).map((tag) => <Tag name={tag} />)}
+        </div>
       </div>
     </div>
   </a>

@@ -3,11 +3,35 @@ import BaseLayout from '@layouts/BaseLayout.astro';
 ---
 
 <BaseLayout title="About | Agentic Signal" description="このサイトの方針についてです。">
-  <section class="card-surface mx-auto max-w-3xl p-8 sm:p-10">
-    <h1 class="text-4xl">About</h1>
-    <p class="mt-6 text-sm leading-8 opacity-85 sm:text-base">
-      Agentic Signalは、AIエージェント開発やAIを組み込んだ開発ワークフロー構築の実践知を中心に発信する技術ブログです。
-      ノイズの多いAI界隈から、現場で本当に使える「シグナル」だけを不定期でお届けします。
-    </p>
+  <section class="mx-auto max-w-3xl">
+    <header class="border-b pb-8" style="border-color: rgb(var(--line));">
+      <p class="section-kicker">About</p>
+      <h1 class="page-title">このブログについて</h1>
+      <p class="page-copy">
+        Agentic Signal は、AIエージェント開発や AI を組み込んだ開発ワークフロー構築の実践知を中心に発信する技術ブログです。
+      </p>
+    </header>
+
+    <div class="mt-8 space-y-6 text-base leading-8" style="color: rgb(var(--text-muted));">
+      <p>
+        試して終わりの話ではなく、実際の開発でどう設計し、どこで詰まり、どう運用に乗せるかまで含めて残していきます。
+        ノイズの多いAI界隈の中で、あとから見返しても使えるメモであることを大事にしています。
+      </p>
+      <p>
+        扱うテーマは、RAG、LLM 制御、評価、エージェント実装、AI を組み込んだ開発フローの整理など。
+        速さよりも、読みやすさと再利用しやすさを優先した書き方を目指しています。
+      </p>
+    </div>
+
+    <div class="mt-8 flex flex-wrap gap-x-6 gap-y-3">
+      <a href="/blog/" class="inline-link">
+        記事一覧を見る
+        <span aria-hidden="true">→</span>
+      </a>
+      <a href="/rss.xml" class="inline-link">
+        RSSを購読
+        <span aria-hidden="true">→</span>
+      </a>
+    </div>
   </section>
 </BaseLayout>

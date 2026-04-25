@@ -9,40 +9,41 @@ interface Props {
 const { currentPage, lastPage, prevUrl, nextUrl } = Astro.props;
 ---
 
-<nav class="mt-20 flex items-center justify-center gap-2 sm:gap-4" aria-label="ページネーション">
+<nav class="mt-12 flex flex-col gap-5 border-t pt-6 sm:flex-row sm:items-center sm:justify-between" aria-label="ページネーション" style="border-color: rgb(var(--line));">
   {prevUrl ? (
-    <a class="btn-outline flex h-12 w-12 items-center justify-center p-0 sm:w-auto sm:px-6" href={prevUrl} aria-label="Previous page">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <a class="inline-link" href={prevUrl} aria-label="Previous page">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
       </svg>
-      <span class="hidden sm:inline">PREV</span>
+      <span>前のページ</span>
     </a>
   ) : (
-    <span class="btn-outline flex h-12 w-12 cursor-not-allowed items-center justify-center p-0 opacity-30 sm:w-auto sm:px-6">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <span class="inline-flex items-center gap-2 text-sm font-semibold opacity-35" style="color: rgb(var(--text-muted));">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
       </svg>
-      <span class="hidden sm:inline">PREV</span>
+      <span>前のページ</span>
     </span>
   )}
 
-  <div class="flex items-center gap-1 px-4 py-2 font-black tracking-tighter" style="font-family: var(--font-display);">
-    <span class="text-2xl text-brand-600 dark:text-brand-400">{currentPage}</span>
-    <span class="text-slate-300">/</span>
-    <span class="text-lg text-slate-500">{lastPage}</span>
+  <div class="flex items-center gap-2 text-sm font-semibold sm:justify-center" style="color: rgb(var(--text-muted));">
+    <span>Page</span>
+    <span class="text-lg" style="font-family: var(--font-display); color: rgb(var(--text-main));">{currentPage}</span>
+    <span>/</span>
+    <span>{lastPage}</span>
   </div>
 
   {nextUrl ? (
-    <a class="btn-outline flex h-12 w-12 items-center justify-center p-0 sm:w-auto sm:px-6" href={nextUrl} aria-label="Next page">
-      <span class="hidden sm:inline">NEXT</span>
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <a class="inline-link sm:ml-auto" href={nextUrl} aria-label="Next page">
+      <span>次のページ</span>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
       </svg>
     </a>
   ) : (
-    <span class="btn-outline flex h-12 w-12 cursor-not-allowed items-center justify-center p-0 opacity-30 sm:w-auto sm:px-6">
-      <span class="hidden sm:inline">NEXT</span>
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <span class="inline-flex items-center gap-2 text-sm font-semibold opacity-35 sm:ml-auto" style="color: rgb(var(--text-muted));">
+      <span>次のページ</span>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
       </svg>
     </span>

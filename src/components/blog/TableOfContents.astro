@@ -15,12 +15,12 @@ const visibleHeadings = headings.filter((heading) => heading.depth >= 2 && headi
 
 {
   visibleHeadings.length > 0 && (
-    <nav class="card-surface p-4" aria-label="目次">
-      <h2 class="mb-3 text-lg font-bold">目次</h2>
+    <nav class="rounded-2xl border px-5 py-5" aria-label="目次" style="border-color: rgb(var(--line)); background: rgba(var(--surface), 0.45);">
+      <h2 class="mb-4 text-xs font-semibold uppercase tracking-[0.24em]" style="color: rgb(var(--text-muted));">目次</h2>
       <ul class="space-y-2">
         {visibleHeadings.map((heading) => (
-          <li class={heading.depth === 3 ? 'ml-4 text-sm opacity-85' : 'text-sm'}>
-            <a href={`#${heading.slug}`} class="hover:opacity-100 opacity-80 transition-opacity">
+          <li class={heading.depth === 3 ? 'ml-4 text-sm' : 'text-sm'}>
+            <a href={`#${heading.slug}`} class="transition-colors hover:text-[rgb(var(--accent))]" style="color: rgb(var(--text-muted));">
               {heading.text}
             </a>
           </li>

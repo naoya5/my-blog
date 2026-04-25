@@ -1,7 +1,6 @@
 ---
 import { Image } from 'astro:assets';
 import { getCollection, type CollectionEntry } from 'astro:content';
-import BlogCard from '@components/blog/BlogCard.astro';
 import ReadingTime from '@components/blog/ReadingTime.astro';
 import TableOfContents from '@components/blog/TableOfContents.astro';
 import Tag from '@components/ui/Tag.astro';
@@ -65,89 +64,84 @@ const schemaJson = JSON.stringify(schema).replace(/</g, '\\u003c');
 >
   <script type="application/ld+json" is:inline set:html={schemaJson} />
 
-  <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px]">
-    <div>
-      <article data-pagefind-body>
-        <header class="mb-12">
-          <div class="flex flex-wrap items-center gap-4 text-sm font-bold uppercase tracking-widest text-brand-600 dark:text-brand-400">
-            <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
-            {post.data.updatedDate && <span class="opacity-50">Updated: {formatDate(post.data.updatedDate)}</span>}
-            <span class="h-1 w-1 rounded-full bg-slate-300"></span>
-            <ReadingTime content={post.body} />
-          </div>
-          
-          <h1 class="mt-6 text-balance text-4xl font-black leading-[1.2] tracking-tight sm:text-6xl" style="font-family: var(--font-display);" data-pagefind-meta="title">
-            {post.data.title}
-          </h1>
-          
-          <p class="mt-6 text-xl leading-relaxed text-slate-600 dark:text-slate-400">
-            {post.data.description}
-          </p>
-          
-          <div class="mt-8 flex flex-wrap gap-2">
-            {post.data.tags.map((tag) => <Tag name={tag} />)}
-          </div>
-
-          {heroImage && (
-            <div class="mt-12 overflow-hidden rounded-3xl border border-slate-200 shadow-2xl dark:border-slate-800">
-              {typeof heroImage === 'string' ? (
-                <img
-                  src={heroImage}
-                  alt={post.data.title}
-                  width="1200"
-                  height="630"
-                  class="aspect-[21/9] w-full object-cover"
-                  loading="eager"
-                  decoding="async"
-                />
-              ) : (
-                <Image
-                  src={heroImage}
-                  alt={post.data.title}
-                  width={1200}
-                  height={630}
-                  class="aspect-[21/9] w-full object-cover"
-                  loading="eager"
-                />
-              )}
-            </div>
-          )}
-        </header>
-
-        <div class="card-surface p-8 sm:p-12">
-          <div class="prose prose-slate mx-auto lg:prose-xl dark:prose-invert">
-            <Content />
-          </div>
-        </div>
-      </article>
-
-      {relatedPosts.length > 0 && (
-        <section class="mt-20">
-          <h2 class="mb-10 text-3xl font-black tracking-tight" style="font-family: var(--font-display);">関連記事</h2>
-          <div class="grid gap-8 md:grid-cols-2">
-            {relatedPosts.slice(0, 2).map((relatedPost) => <BlogCard post={relatedPost} />)}
-          </div>
-        </section>
-      )}
-    </div>
-
-    <aside class="hidden lg:block">
-      <div class="sticky top-28 space-y-10">
-        <div class="card-surface p-6">
-          <h3 class="mb-4 text-xs font-bold uppercase tracking-widest text-slate-400">Table of Contents</h3>
-          <TableOfContents headings={headings} />
-        </div>
-        
-        <div class="card-surface p-6 bg-gradient-to-br from-brand-50 to-white dark:from-brand-950 dark:to-slate-900 border-brand-100 dark:border-brand-900">
-          <h3 class="text-lg font-bold">Agentic Signal</h3>
-          <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            AIエージェント開発とAIワークフロー構築のための実践的な知見を発信しています。
-          </p>
-          <a href="/about/" class="mt-4 inline-flex text-sm font-bold text-brand-600 dark:text-brand-400 hover:underline">
-            About this site →
-          </a>
-        </div>
+  <article data-pagefind-body class="mx-auto max-w-3xl">
+    <header class="border-b pb-10" style="border-color: rgb(var(--line));">
+      <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-semibold uppercase tracking-[0.24em]" style="color: rgb(var(--text-muted));">
+        <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+        {post.data.updatedDate && <span>Updated {formatDate(post.data.updatedDate)}</span>}
+        <ReadingTime content={post.body} />
       </div>
-    </aside>
-  </div>
+
+      <h1 class="mt-5 text-balance text-4xl leading-tight sm:text-5xl" style="font-family: var(--font-display);" data-pagefind-meta="title">
+        {post.data.title}
+      </h1>
+
+      <p class="mt-5 text-base leading-8 sm:text-lg" style="color: rgb(var(--text-muted));">
+        {post.data.description}
+      </p>
+
+      <div class="mt-6 flex flex-wrap gap-2">
+        {post.data.tags.map((tag) => <Tag name={tag} />)}
+      </div>
+
+      {heroImage && (
+        <div class="mt-10 overflow-hidden rounded-2xl border" style="border-color: rgb(var(--line));">
+          {typeof heroImage === 'string' ? (
+            <img
+              src={heroImage}
+              alt={post.data.title}
+              width="1200"
+              height="630"
+              class="aspect-[21/9] w-full object-cover"
+              loading="eager"
+              decoding="async"
+            />
+          ) : (
+            <Image
+              src={heroImage}
+              alt={post.data.title}
+              width={1200}
+              height={630}
+              class="aspect-[21/9] w-full object-cover"
+              loading="eager"
+            />
+          )}
+        </div>
+      )}
+    </header>
+
+    {headings.length > 0 && (
+      <div class="mt-8">
+        <TableOfContents headings={headings} />
+      </div>
+    )}
+
+    <div class="prose prose-slate mt-10 dark:prose-invert">
+      <Content />
+    </div>
+  </article>
+
+  {relatedPosts.length > 0 && (
+    <section class="mx-auto mt-16 max-w-3xl border-t pt-8" style="border-color: rgb(var(--line));">
+      <p class="section-kicker">Related Posts</p>
+      <h2 class="mt-2 text-2xl">関連記事</h2>
+      <div class="mt-4">
+        {relatedPosts.slice(0, 2).map((relatedPost) => (
+          <article class="list-divider first:border-t-0">
+            <a href={`/blog/${relatedPost.slug}/`} class="group block py-5">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.24em]" style="color: rgb(var(--text-muted));">
+                {formatDate(relatedPost.data.pubDate)}
+              </div>
+              <h3 class="mt-2 text-xl transition-colors group-hover:text-[rgb(var(--accent))]" style="font-family: var(--font-display);">
+                {relatedPost.data.title}
+              </h3>
+              <p class="mt-2 text-sm leading-7" style="color: rgb(var(--text-muted));">
+                {relatedPost.data.description}
+              </p>
+            </a>
+          </article>
+        ))}
+      </div>
+    </section>
+  )}
 </BaseLayout>
