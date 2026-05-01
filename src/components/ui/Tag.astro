@@ -11,7 +11,7 @@ const { name } = Astro.props;
   href={`/blog/tag/${encodeURIComponent(name)}/`}
   data-pagefind-filter="tag"
 >
-  <span class="relative z-10 transition-colors group-hover:text-brand-700 dark:group-hover:text-brand-300">
+  <span class="relative z-10 transition-colors">
     <span class="opacity-50 font-normal mr-0.5">#</span>{name}
   </span>
 </a>

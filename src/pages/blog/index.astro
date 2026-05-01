@@ -11,53 +11,31 @@ const posts = await getSortedPosts();
   title="Archive | Agentic Signal" 
   description="AIエージェント開発、AI駆動ワークフロー構築に関する記事一覧です。"
 >
-  <header class="mb-16">
-    <div class="flex items-center gap-3 text-sm font-bold uppercase tracking-widest text-brand-600 dark:text-brand-400">
-      <span class="h-1 w-8 bg-brand-500"></span>
-      Archive
-    </div>
-    <h1 class="mt-4 text-balance text-4xl font-black tracking-tight sm:text-6xl" style="font-family: var(--font-display);">
-      AI Agents & Workflow
-    </h1>
-    <p class="mt-6 max-w-2xl text-lg text-slate-600 dark:text-slate-400">
-      AIエージェント開発、RAG、LLM制御、そしてAIを組み込んだ開発ワークフローについての探求の記録。
-      現場の実践から得られたシグナルを体系的にまとめています。
-    </p>
-  </header>
-
-  <section class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px] 2xl:grid-cols-[minmax(0,1fr)_380px]">
-    <div class="grid gap-8 md:grid-cols-2 2xl:grid-cols-3">
-      {posts.map((post) => <BlogCard post={post} />)}
-    </div>
-
-    <aside class="space-y-8">
-      <Search />
-      
-      <div class="card-surface p-6">
-        <h2 class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">Site Stats</h2>
-        <div class="space-y-4">
-          <div class="flex items-center justify-between">
-            <span class="text-sm text-slate-500">Total Posts</span>
-            <span class="font-bold">{posts.length}</span>
-          </div>
-          <a class="btn-outline w-full py-2 text-xs" href="/blog/page/1/">
-            Browse Pagination
-          </a>
-        </div>
-      </div>
-
-      <div class="card-surface p-6 bg-brand-50/50 dark:bg-brand-950/20 border-brand-100 dark:border-brand-900">
-        <h2 class="font-bold mb-2">Subscribe</h2>
-        <p class="text-xs text-slate-500 leading-relaxed mb-4">
-          新着記事の通知を受け取りたい場合はRSSをご利用ください。
-        </p>
-        <a href="/rss.xml" class="text-sm font-bold text-brand-600 dark:text-brand-400 flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 5c7.18 0 13 5.82 13 13M6 11a7 7 0 017 7m-6 0a1 1 0 11-2 0 1 1 0 012 0z" />
-          </svg>
+  <section class="mx-auto max-w-4xl">
+    <header class="border-b pb-8" style="border-color: rgb(var(--line));">
+      <p class="section-kicker">Archive</p>
+      <h1 class="page-title">AI Agents & Workflow</h1>
+      <p class="page-copy">
+        AIエージェント開発、RAG、LLM制御、そしてAIを組み込んだ開発ワークフローについての記録を、公開順に一覧できます。
+      </p>
+      <div class="mt-7 flex flex-wrap gap-x-6 gap-y-3">
+        <a href="/rss.xml" class="inline-link">
           RSS Feed
+          <span aria-hidden="true">→</span>
+        </a>
+        <a href="/blog/page/1/" class="inline-link">
+          ページ単位で見る
+          <span aria-hidden="true">→</span>
         </a>
       </div>
-    </aside>
+    </header>
+
+    <div class="mt-8">
+      <Search />
+    </div>
+
+    <div class="mt-10">
+      {posts.map((post) => <BlogCard post={post} />)}
+    </div>
   </section>
 </BaseLayout>
