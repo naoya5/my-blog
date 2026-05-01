@@ -1,10 +1,9 @@
 ---
-import BlogCard from '@components/blog/BlogCard.astro';
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { getSortedPosts } from '@utils/getSortedPosts';
 
 const posts = await getSortedPosts();
-const latestPosts = posts.slice(0, 3);
+const latestPosts = posts.slice(0, 5);
 ---
 
 <BaseLayout
@@ -59,19 +58,37 @@ const latestPosts = posts.slice(0, 3);
   </section>
 
   <section class="mx-auto mt-10 max-w-4xl">
-    <div class="flex items-end justify-between gap-4 border-b pb-4" style="border-color: rgb(var(--line));">
-      <div>
-        <p class="section-kicker">Latest Posts</p>
-        <h2 class="mt-2 text-2xl sm:text-3xl">最近の投稿</h2>
-      </div>
-      <a class="inline-link" href="/blog/">
-        すべて見る
-        <span aria-hidden="true">→</span>
-      </a>
+    <h2 class="text-2xl font-extrabold tracking-tight sm:text-3xl" style="font-family: var(--font-body);">
+      Latest Posts
+    </h2>
+
+    <div class="mt-8 border-t" style="border-color: rgba(var(--line), 0.9);">
+      {latestPosts.map((post) => (
+        <article class="border-b py-5 sm:py-6" style="border-color: rgba(var(--line), 0.9);">
+          <a
+            href={`/blog/${post.slug}/`}
+            class="grid gap-2 text-[rgb(var(--text-main))] transition-colors hover:text-[rgb(var(--accent))] sm:grid-cols-[minmax(0,1fr)_140px] sm:items-start sm:gap-6"
+          >
+            <h3 class="text-base font-extrabold leading-7 sm:text-[1.45rem] sm:leading-[1.5]" style="font-family: var(--font-body);">
+              {post.data.title}
+            </h3>
+            <time
+              datetime={post.data.pubDate.toISOString()}
+              class="text-xs font-medium tracking-[0.04em] sm:pt-1 sm:text-right sm:text-sm"
+              style="color: rgb(var(--text-muted));"
+            >
+              {post.data.pubDate.toISOString().slice(0, 10)}
+            </time>
+          </a>
+        </article>
+      ))}
     </div>
 
-    <div class="mt-2">
-      {latestPosts.map((post) => <BlogCard post={post} />)}
+    <div class="mt-6">
+      <a href="/blog/" class="inline-link text-sm sm:text-base">
+        すべての記事を見る
+        <span aria-hidden="true">→</span>
+      </a>
     </div>
   </section>
 </BaseLayout>
