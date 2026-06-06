@@ -2,7 +2,7 @@
 title: 'cook'
 description: 'cookについての記事'
 pubDate: 2026-03-23
-updatedDate: 2026-06-06
+updatedDate: 2026-06-07
 tags: ['AI']
 draft: false
 ---
