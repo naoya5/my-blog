@@ -3,10 +3,12 @@ import { Image } from 'astro:assets';
 import { getCollection, type CollectionEntry } from 'astro:content';
 import ReadingTime from '@components/blog/ReadingTime.astro';
 import TableOfContents from '@components/blog/TableOfContents.astro';
+import JsonLd from '@components/seo/JsonLd.astro';
 import Tag from '@components/ui/Tag.astro';
 import BaseLayout from '@layouts/BaseLayout.astro';
 import { formatDate } from '@utils/formatDate';
 import { getRelatedPosts } from '@utils/getRelatedPosts';
+import { SITE_AUTHOR, SITE_LANG, SITE_TITLE } from '../../consts';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog', ({ data }) => (import.meta.env.PROD ? !data.draft : true));
@@ -27,13 +29,18 @@ const posts = await getCollection('blog', ({ data }) => (import.meta.env.PROD ? 
 const relatedPosts = getRelatedPosts(post, posts);
 const heroImage = post.data.heroImage;
 
+// SNS シェア用 OG 画像は記事ごとにビルド時生成する（/og/blog/<slug>.png）。
+const ogImagePath = `/og/blog/${post.slug}.png`;
+const ogImageUrl = new URL(ogImagePath, Astro.site).toString();
+const canonicalUrl = new URL(`/blog/${post.slug}/`, Astro.site).toString();
+
 const heroForSchema = heroImage
   ? typeof heroImage === 'string'
     ? heroImage
     : new URL(heroImage.src, Astro.site).toString()
-  : new URL('/images/default-og.svg', Astro.site).toString();
+  : ogImageUrl;
 
-const schema = {
+const articleSchema = {
   '@context': 'https://schema.org',
   '@type': 'BlogPosting',
   headline: post.data.title,
@@ -41,28 +48,38 @@ const schema = {
   image: [heroForSchema],
   datePublished: post.data.pubDate.toISOString(),
   dateModified: (post.data.updatedDate ?? post.data.pubDate).toISOString(),
-  author: [
-    {
-      '@type': 'Person',
-      name: 'Agentic Signal',
-    },
-  ],
+  inLanguage: SITE_LANG,
+  mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
+  author: [{ '@type': 'Person', name: SITE_AUTHOR }],
+  publisher: {
+    '@type': 'Organization',
+    name: SITE_TITLE,
+    logo: { '@type': 'ImageObject', url: new URL('/favicon.svg', Astro.site).toString() },
+  },
+  ...(post.data.tags.length > 0 ? { keywords: post.data.tags.join(', ') } : {}),
 };
 
-// Prevent closing the script tag when serializing untrusted text fields.
-const schemaJson = JSON.stringify(schema).replace(/</g, '\\u003c');
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: new URL('/', Astro.site).toString() },
+    { '@type': 'ListItem', position: 2, name: 'Blog', item: new URL('/blog/', Astro.site).toString() },
+    { '@type': 'ListItem', position: 3, name: post.data.title, item: canonicalUrl },
+  ],
+};
 ---
 
 <BaseLayout
-  title={`${post.data.title} | Agentic Signal`}
+  title={`${post.data.title} | ${SITE_TITLE}`}
   description={post.data.description}
-  image={heroImage}
+  image={ogImagePath}
   type="article"
   publishedTime={post.data.pubDate}
   modifiedTime={post.data.updatedDate}
   tags={post.data.tags}
 >
-  <script type="application/ld+json" is:inline set:html={schemaJson} />
+  <JsonLd schema={[articleSchema, breadcrumbSchema]} />
 
   <article data-pagefind-body class="mx-auto max-w-3xl">
     <header class="border-b pb-10" style="border-color: rgb(var(--line));">

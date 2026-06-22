@@ -1,6 +1,7 @@
 import rss from "@astrojs/rss";
 import { getCollection } from "astro:content";
 import type { APIContext } from "astro";
+import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
 
 export async function GET(context: APIContext) {
   const posts = await getCollection("blog", ({ data }) =>
@@ -8,9 +9,9 @@ export async function GET(context: APIContext) {
   );
 
   return rss({
-    title: "Agentic Signal",
-    description: "Astro実装の知見を記録する技術ブログ",
-    site: context.site ?? "https://example.com",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    site: context.site ?? "https://my-blog.pages.dev",
     items: posts
       .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
       .map((post) => ({

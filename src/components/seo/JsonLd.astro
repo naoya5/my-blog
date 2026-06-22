@@ -1,0 +1,12 @@
+---
+// JSON-LD 構造化データを安全に出力する小コンポーネント。
+// `</script>` 等での閉じタグ注入を防ぐため `<` をエスケープする。
+interface Props {
+  schema: Record<string, unknown> | Array<Record<string, unknown>>;
+}
+
+const { schema } = Astro.props;
+const json = JSON.stringify(schema).replace(/</g, '\\u003c');
+---
+
+<script type="application/ld+json" is:inline set:html={json} />
