@@ -23,8 +23,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const GET: APIRoute = async ({ props, site }) => {
   const domain = site ? site.host : '';
+  // 空文字タイトル（Zod の z.string() は '' を許容）はサイト名にフォールバックする。
+  const rawTitle = typeof props.title === 'string' ? props.title.trim() : '';
   const png = await renderOgImage({
-    title: String(props.title ?? SITE_TITLE),
+    title: rawTitle || SITE_TITLE,
     subtitle: typeof props.subtitle === 'string' ? props.subtitle : undefined,
     domain,
   });
@@ -32,7 +34,9 @@ export const GET: APIRoute = async ({ props, site }) => {
   return new Response(new Uint8Array(png), {
     headers: {
       'Content-Type': 'image/png',
-      'Cache-Control': 'public, max-age=31536000, immutable',
+      // URL は slug で固定だが画像内容は記事のタイトル/説明に依存するため immutable にはしない。
+      // 編集→再ビルド後に更新が伝播するよう日次で再検証させる（実体の制御は public/_headers の /og/* も参照）。
+      'Cache-Control': 'public, max-age=86400, must-revalidate',
     },
   });
 };

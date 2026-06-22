@@ -6,3 +6,7 @@
   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
   Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), microphone=(), payment=(), usb=()
 */
+
+# OG 画像は slug 固定 URL だが内容は記事タイトル/説明に依存するため immutable にはせず日次再検証
+/og/*
+  Cache-Control: public, max-age=86400, must-revalidate

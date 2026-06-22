@@ -6,6 +6,7 @@ import satori from 'satori';
 // ビルド時にのみ実行される（OG エンドポイントは静的にプリレンダリングされる）。
 // 日本語フォントは初回のみ CDN から取得し、.cache/og-fonts にキャッシュする。
 const CACHE_DIR = path.resolve('.cache/og-fonts');
+const EYEBROW = 'AGENTIC SIGNAL';
 
 const FONT_SOURCES = [
   {
@@ -20,7 +21,9 @@ const FONT_SOURCES = [
   },
 ];
 
-// ブランドパレット（global.css の温かみのある編集デザインに合わせる）。
+// ブランドパレット。global.css の CSS カスタムプロパティ（--accent / --line / --text-main 等）と
+// 同じ値の写し。OG 画像は Node 上のビルド時に生成され CSS 変数を参照できないため、ここで複製している。
+// global.css 側のブランドカラーを変えたら、この定数も合わせて更新すること。
 const COLOR = {
   bg: 'rgb(247, 243, 237)',
   bgAccent: 'rgb(241, 230, 218)',
@@ -30,33 +33,68 @@ const COLOR = {
   line: 'rgb(219, 211, 201)',
 };
 
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// sfnt フォントのシグネチャ（OTTO / TrueType / 'true' / 'ttcf'）と最小サイズで破損を弾く。
+function looksLikeFont(buf: Buffer): boolean {
+  if (buf.length < 1024) return false;
+  const sig = buf.readUInt32BE(0);
+  return sig === 0x4f54544f || sig === 0x00010000 || sig === 0x74727565 || sig === 0x74746366;
+}
+
+async function fetchFont(url: string, attempts = 3): Promise<Buffer> {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const buf = Buffer.from(await res.arrayBuffer());
+      if (!looksLikeFont(buf)) throw new Error(`不正なフォントデータ (${buf.length} bytes)`);
+      return buf;
+    } catch (error) {
+      lastError = error;
+      if (attempt < attempts) await delay(300 * 2 ** (attempt - 1));
+    }
+  }
+  throw new Error(`OG フォントの取得に失敗しました（${attempts}回試行）: ${url} — ${String(lastError)}`);
+}
+
 async function loadFont(source: (typeof FONT_SOURCES)[number]): Promise<Buffer> {
   const cached = path.join(CACHE_DIR, source.file);
   try {
-    return await fs.readFile(cached);
+    const buf = await fs.readFile(cached);
+    if (looksLikeFont(buf)) return buf;
+    // 破損・切り詰めキャッシュ（中断した書き込み等）は無視して取り直す。
   } catch {
-    const res = await fetch(source.url);
-    if (!res.ok) {
-      throw new Error(`OG フォントの取得に失敗しました (${res.status}): ${source.url}`);
-    }
-    const buf = Buffer.from(await res.arrayBuffer());
-    await fs.mkdir(CACHE_DIR, { recursive: true });
-    await fs.writeFile(cached, new Uint8Array(buf));
-    return buf;
+    // キャッシュミス。
   }
+
+  const buf = await fetchFont(source.url);
+  await fs.mkdir(CACHE_DIR, { recursive: true });
+  // アトミック書き込み: 一時ファイルへ書いてから rename（同一 FS 上で原子的）。
+  const tmp = `${cached}.${process.pid}.tmp`;
+  await fs.writeFile(tmp, new Uint8Array(buf));
+  await fs.rename(tmp, cached);
+  return buf;
 }
 
 let fontsPromise: Promise<Array<{ name: string; data: Buffer; weight: 400 | 700; style: 'normal' }>> | null = null;
 
 function getFonts() {
-  fontsPromise ??= Promise.all(
-    FONT_SOURCES.map(async (source) => ({
-      name: 'Noto Sans JP',
-      data: await loadFont(source),
-      weight: source.weight,
-      style: 'normal' as const,
-    })),
-  );
+  if (!fontsPromise) {
+    fontsPromise = Promise.all(
+      FONT_SOURCES.map(async (source) => ({
+        name: 'Noto Sans JP',
+        data: await loadFont(source),
+        weight: source.weight,
+        style: 'normal' as const,
+      })),
+    ).catch((error) => {
+      // 失敗した Promise をキャッシュし続けない。次の呼び出しで再取得できるようにする。
+      fontsPromise = null;
+      throw error;
+    });
+  }
   return fontsPromise;
 }
 
@@ -76,12 +114,11 @@ function clamp(value: string, max: number): string {
 export interface OgImageInput {
   title: string;
   subtitle?: string;
-  eyebrow?: string;
   domain?: string;
 }
 
 // satori は React 要素そのままのプレーンオブジェクト（{ type, props }）を受け取れる。
-function buildCard({ title, subtitle, eyebrow, domain }: Required<OgImageInput>) {
+function buildCard({ title, subtitle, domain }: Required<OgImageInput>) {
   return {
     type: 'div',
     props: {
@@ -124,7 +161,7 @@ function buildCard({ title, subtitle, eyebrow, domain }: Required<OgImageInput>)
               textTransform: 'uppercase',
               color: COLOR.accent,
             },
-            children: eyebrow,
+            children: EYEBROW,
           },
         },
         // 中段: タイトル + サブタイトル
@@ -198,7 +235,6 @@ export async function renderOgImage(input: OgImageInput): Promise<Buffer> {
     buildCard({
       title: input.title,
       subtitle: input.subtitle ?? '',
-      eyebrow: input.eyebrow ?? 'AGENTIC SIGNAL',
       domain: input.domain ?? '',
     }) as unknown as Parameters<typeof satori>[0],
     {

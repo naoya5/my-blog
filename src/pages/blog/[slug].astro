@@ -15,18 +15,18 @@ export async function getStaticPaths() {
 
   return posts.map((post) => ({
     params: { slug: post.slug },
-    props: { post },
+    // 関連記事はここで算出して渡す（本文側で getCollection を再実行しない）。
+    props: { post, relatedPosts: getRelatedPosts(post, posts) },
   }));
 }
 
 interface Props {
   post: CollectionEntry<'blog'>;
+  relatedPosts: CollectionEntry<'blog'>[];
 }
 
-const { post } = Astro.props as Props;
+const { post, relatedPosts } = Astro.props as Props;
 const { Content, headings } = await post.render();
-const posts = await getCollection('blog', ({ data }) => (import.meta.env.PROD ? !data.draft : true));
-const relatedPosts = getRelatedPosts(post, posts);
 const heroImage = post.data.heroImage;
 
 // SNS シェア用 OG 画像は記事ごとにビルド時生成する（/og/blog/<slug>.png）。
@@ -74,6 +74,7 @@ const breadcrumbSchema = {
   title={`${post.data.title} | ${SITE_TITLE}`}
   description={post.data.description}
   image={ogImagePath}
+  imageAlt={post.data.title}
   type="article"
   publishedTime={post.data.pubDate}
   modifiedTime={post.data.updatedDate}

@@ -23,6 +23,7 @@ interface Props {
   modifiedTime?: Date;
   tags?: string[];
   noindex?: boolean;
+  imageAlt?: string;
 }
 
 const {
@@ -35,6 +36,7 @@ const {
   modifiedTime,
   tags = [],
   noindex = false,
+  imageAlt = title,
 } = Astro.props;
 
 const resolvedImage =
@@ -96,7 +98,7 @@ const fontCssUrl =
 <meta property="og:image" content={resolvedImage} />
 <meta property="og:image:width" content={String(OG_IMAGE_WIDTH)} />
 <meta property="og:image:height" content={String(OG_IMAGE_HEIGHT)} />
-<meta property="og:image:alt" content={title} />
+<meta property="og:image:alt" content={imageAlt} />
 <meta property="og:site_name" content={SITE_TITLE} />
 <meta property="og:locale" content={SITE_LOCALE} />
 
@@ -104,7 +106,7 @@ const fontCssUrl =
 <meta name="twitter:title" content={title} />
 <meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={resolvedImage} />
-<meta name="twitter:image:alt" content={title} />
+<meta name="twitter:image:alt" content={imageAlt} />
 {twitterHandle && <meta name="twitter:site" content={twitterHandle} />}
 {twitterHandle && <meta name="twitter:creator" content={twitterHandle} />}
 

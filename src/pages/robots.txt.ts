@@ -4,7 +4,7 @@ import type { APIRoute } from 'astro';
 // ドメインは astro.config.mjs の `site` が単一の真実の源なので、
 // ここを手で書き換える必要はない。
 export const GET: APIRoute = ({ site }) => {
-  const sitemapUrl = new URL('sitemap-index.xml', site ?? 'https://example.com').toString();
+  const sitemapUrl = new URL('sitemap-index.xml', site ?? 'https://my-blog.pages.dev').toString();
 
   const body = ['User-agent: *', 'Allow: /', '', `Sitemap: ${sitemapUrl}`, ''].join('\n');
 
