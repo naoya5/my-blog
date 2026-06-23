@@ -4,6 +4,9 @@ dist/
 # generated types
 .astro/
 
+# OG フォントなどのビルドキャッシュ
+.cache/
+
 # dependencies
 node_modules/
 

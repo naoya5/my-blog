@@ -14,7 +14,9 @@ import {
 } from '@shikijs/transformers';
 
 export default defineConfig({
-  site: 'https://example.com',
+  // ▼ 本番ドメインの単一の真実の源。ここを変えれば canonical / OG / sitemap /
+  //   robots.txt / RSS / 構造化データのすべてに反映される。独自ドメイン設定後に差し替えること。
+  site: 'https://my-blog.pages.dev',
   output: 'static',
   trailingSlash: 'always',
   adapter: cloudflare({ imageService: 'passthrough' }),
@@ -50,5 +52,12 @@ export default defineConfig({
   },
   build: {
     inlineStylesheets: 'auto',
+  },
+  vite: {
+    ssr: {
+      // OG 画像生成のネイティブモジュール。バンドルせず Node の require に委ねる
+      //（OG エンドポイントはビルド時にプリレンダリングされるため Node 上で実行される）。
+      external: ['@resvg/resvg-js'],
+    },
   },
 });

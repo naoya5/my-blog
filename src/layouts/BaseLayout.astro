@@ -6,6 +6,7 @@ import Header from '@components/layout/Header.astro';
 import SearchModal from '@components/layout/SearchModal.astro';
 import '@styles/global.css';
 import type { ImageMetadata } from 'astro';
+import { SITE_LANG } from '../consts';
 
 interface Props {
   title: string;
@@ -16,13 +17,16 @@ interface Props {
   publishedTime?: Date;
   modifiedTime?: Date;
   tags?: string[];
+  noindex?: boolean;
+  imageAlt?: string;
 }
 
-const { title, description, image, hideFooter = false, type, publishedTime, modifiedTime, tags } = Astro.props;
+const { title, description, image, hideFooter = false, type, publishedTime, modifiedTime, tags, noindex, imageAlt } =
+  Astro.props;
 ---
 
 <!doctype html>
-<html lang="ja">
+<html lang={SITE_LANG}>
   <head>
     <script is:inline>
       (() => {
@@ -45,6 +49,8 @@ const { title, description, image, hideFooter = false, type, publishedTime, modi
       publishedTime={publishedTime}
       modifiedTime={modifiedTime}
       tags={tags}
+      noindex={noindex}
+      imageAlt={imageAlt}
     />
   </head>
   <body>

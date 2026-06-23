@@ -1,5 +1,17 @@
 ---
 import type { ImageMetadata } from 'astro';
+import JsonLd from '@components/seo/JsonLd.astro';
+import {
+  DEFAULT_OG_IMAGE,
+  OG_IMAGE_HEIGHT,
+  OG_IMAGE_WIDTH,
+  SITE_AUTHOR,
+  SITE_DESCRIPTION,
+  SITE_LANG,
+  SITE_LOCALE,
+  SITE_TITLE,
+  TWITTER_HANDLE,
+} from '../../consts';
 
 interface Props {
   title: string;
@@ -10,36 +22,68 @@ interface Props {
   publishedTime?: Date;
   modifiedTime?: Date;
   tags?: string[];
+  noindex?: boolean;
+  imageAlt?: string;
 }
 
 const {
   title,
-  description = 'Astroで構築した技術ブログです。',
-  image = '/images/default-og.svg',
+  description = SITE_DESCRIPTION,
+  image = DEFAULT_OG_IMAGE,
   canonicalURL = new URL(Astro.url.pathname, Astro.site),
   type = 'website',
   publishedTime,
   modifiedTime,
   tags = [],
+  noindex = false,
+  imageAlt = title,
 } = Astro.props;
 
 const resolvedImage =
   typeof image === 'string' ? new URL(image, Astro.site).toString() : new URL(image.src, Astro.site).toString();
+
+const twitterHandle = TWITTER_HANDLE.trim();
+
+// サイト全体の構造化データ（WebSite / Organization）。ドメインは Astro.site が単一の源。
+const siteUrl = (Astro.site ?? new URL(canonicalURL.origin)).toString();
+const siteSchema: Array<Record<string, unknown>> = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: SITE_TITLE,
+    url: siteUrl,
+    description: SITE_DESCRIPTION,
+    inLanguage: SITE_LANG,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: SITE_TITLE,
+    url: siteUrl,
+    logo: new URL('/favicon.svg', Astro.site).toString(),
+  },
+];
+
+const fontCssUrl =
+  'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap';
 ---
 
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <meta name="generator" content={Astro.generator} />
+<meta name="author" content={SITE_AUTHOR} />
+{noindex && <meta name="robots" content="noindex,nofollow" />}
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="icon" href="/favicon.ico" />
 <link rel="canonical" href={canonicalURL} />
+<link rel="alternate" type="application/rss+xml" title={SITE_TITLE} href={new URL('/rss.xml', Astro.site)} />
+<link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-<link
-  href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap"
-  rel="stylesheet"
-/>
+<link rel="preload" as="style" href={fontCssUrl} />
+<link rel="stylesheet" href={fontCssUrl} media="print" data-font-stylesheet />
+<noscript><link rel="stylesheet" href={fontCssUrl} /></noscript>
 <link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
 <script src="/pagefind/pagefind-ui.js" defer is:inline></script>
 
@@ -52,13 +96,40 @@ const resolvedImage =
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
 <meta property="og:image" content={resolvedImage} />
-<meta property="og:site_name" content="Agentic Signal" />
+<meta property="og:image:width" content={String(OG_IMAGE_WIDTH)} />
+<meta property="og:image:height" content={String(OG_IMAGE_HEIGHT)} />
+<meta property="og:image:alt" content={imageAlt} />
+<meta property="og:site_name" content={SITE_TITLE} />
+<meta property="og:locale" content={SITE_LOCALE} />
 
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content={title} />
 <meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={resolvedImage} />
+<meta name="twitter:image:alt" content={imageAlt} />
+{twitterHandle && <meta name="twitter:site" content={twitterHandle} />}
+{twitterHandle && <meta name="twitter:creator" content={twitterHandle} />}
 
 {publishedTime && <meta property="article:published_time" content={publishedTime.toISOString()} />}
 {modifiedTime && <meta property="article:modified_time" content={modifiedTime.toISOString()} />}
 {tags.map((tag) => <meta property="article:tag" content={tag} />)}
+
+<JsonLd schema={siteSchema} />
+
+{/* フォント CSS を非ブロッキング読み込みにする。is:inline ではない通常の <script> なので
+    Astro が同一オリジンへバンドルし、CSP の script-src 'self' で許可される。 */}
+<script>
+  const applyFonts = () => {
+    document.querySelectorAll('link[data-font-stylesheet]').forEach((node) => {
+      const link = node as HTMLLinkElement;
+      if (link.sheet) {
+        link.media = 'all';
+      } else {
+        link.addEventListener('load', () => {
+          link.media = 'all';
+        }, { once: true });
+      }
+    });
+  };
+  document.addEventListener('astro:page-load', applyFonts);
+</script>
