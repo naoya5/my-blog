@@ -16,7 +16,7 @@ import {
 export default defineConfig({
   // ▼ 本番ドメインの単一の真実の源。ここを変えれば canonical / OG / sitemap /
   //   robots.txt / RSS / 構造化データのすべてに反映される。独自ドメイン設定後に差し替えること。
-  site: 'https://my-blog.pages.dev',
+  site: 'https://my-blog-atw.pages.dev',
   output: 'static',
   trailingSlash: 'always',
   adapter: cloudflare({ imageService: 'passthrough' }),
