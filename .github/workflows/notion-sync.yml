@@ -46,7 +46,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [ -z "$(git status --porcelain --untracked-files=normal -- src/content/blog)" ]; then
+          if [ -z "$(git status --porcelain --untracked-files=normal -- src/content/blog public/images/blog)" ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
@@ -63,6 +63,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add src/content/blog
+          if [ -d public/images/blog ]; then
+            git add public/images/blog
+          fi
           git commit -m "chore(content): sync scheduled posts from Notion"
           # scheduled runs can start from an older SHA when queued; rebase avoids non-fast-forward failures.
           git pull --rebase origin "$branch"

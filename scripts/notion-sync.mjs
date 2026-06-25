@@ -2,11 +2,25 @@
 
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 const NOTION_API_VERSION = "2026-03-11";
 const NOTION_LEGACY_DATABASE_API_VERSION = "2026-03-11";
 const NOTION_API_BASE = "https://api.notion.com/v1";
 const CONTENT_DIR = path.join(process.cwd(), "src", "content", "blog");
+const BLOG_IMAGE_DIR = path.join(process.cwd(), "public", "images", "blog");
+const BLOG_IMAGE_PUBLIC_PATH = "/images/blog";
+const DEFAULT_IMAGE_EXTENSION = "jpg";
+const IMAGE_CONTENT_TYPE_EXTENSIONS = new Map([
+  ["image/avif", "avif"],
+  ["image/gif", "gif"],
+  ["image/jpeg", "jpg"],
+  ["image/jpg", "jpg"],
+  ["image/png", "png"],
+  ["image/svg+xml", "svg"],
+  ["image/webp", "webp"],
+]);
+const IMAGE_FILE_EXTENSIONS = new Set(["avif", "gif", "jpg", "jpeg", "png", "svg", "webp"]);
 
 class NotionApiError extends Error {
   constructor({ status, code, message, detail, endpoint }) {
@@ -238,7 +252,107 @@ function notionRichTextToMd(arr = []) {
     .trim();
 }
 
-function blockToMarkdown(block, depth = 0) {
+function normalizeImageExtension(ext) {
+  const value = String(ext || "").toLowerCase().replace(/^\./, "");
+  if (!IMAGE_FILE_EXTENSIONS.has(value)) return "";
+  return value === "jpeg" ? "jpg" : value;
+}
+
+function inferImageExtensionFromContentType(contentType) {
+  const mediaType = String(contentType || "").split(";")[0].trim().toLowerCase();
+  return IMAGE_CONTENT_TYPE_EXTENSIONS.get(mediaType) || "";
+}
+
+function inferImageExtensionFromUrl(url) {
+  try {
+    return normalizeImageExtension(path.extname(new URL(url).pathname));
+  } catch {
+    return "";
+  }
+}
+
+function replaceImageExtension(filePath, ext) {
+  const parsed = path.parse(filePath);
+  return path.join(parsed.dir, `${parsed.name}.${ext}`);
+}
+
+function safeImageFileStem(input) {
+  return String(input || "image")
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]/g, "") || "image";
+}
+
+function escapeMarkdownImageAlt(input) {
+  return String(input ?? "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\\/g, "\\\\")
+    .replace(/]/g, "\\]");
+}
+
+function getImageUrl(image) {
+  return image?.external?.url || image?.file?.url || "";
+}
+
+async function downloadImage(url, destinationPath) {
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`Failed to download image ${url}: HTTP ${res.status}`);
+  }
+
+  const contentType = res.headers.get("content-type") || "";
+  const mediaType = contentType.split(";")[0].trim().toLowerCase();
+  if (mediaType && !mediaType.startsWith("image/") && mediaType !== "application/octet-stream") {
+    throw new Error(`Failed to download image ${url}: unexpected content type ${contentType}`);
+  }
+
+  const contentTypeExt = inferImageExtensionFromContentType(contentType);
+  const finalPath = contentTypeExt ? replaceImageExtension(destinationPath, contentTypeExt) : destinationPath;
+  const next = Buffer.from(await res.arrayBuffer());
+
+  await mkdir(path.dirname(finalPath), { recursive: true });
+
+  let previous = null;
+  try {
+    previous = await readFile(finalPath);
+  } catch {
+    // first download
+  }
+
+  if (previous && Buffer.compare(previous, next) === 0) {
+    return { path: finalPath, written: false };
+  }
+
+  await writeFile(finalPath, next);
+  return { path: finalPath, written: true };
+}
+
+async function imageBlockToMarkdown(block, imageContext = {}) {
+  const image = block.image;
+  const url = getImageUrl(image);
+  if (!url) return "";
+
+  const slug = slugify(imageContext.slug || "") || "untitled";
+  const alt = escapeMarkdownImageAlt(richTextToString(image.caption) || imageContext.title || "");
+  const ext = inferImageExtensionFromUrl(url) || DEFAULT_IMAGE_EXTENSION;
+  const filename = `${safeImageFileStem(block.id)}.${ext}`;
+  const destination = path.join(imageContext.imageRootDir || BLOG_IMAGE_DIR, slug, filename);
+  let publicFilename = filename;
+
+  if (imageContext.dryRun) {
+    console.log(`[dry-run] Would download image: ${url} -> ${destination}`);
+  } else {
+    const result = await downloadImage(url, destination);
+    publicFilename = path.basename(result.path);
+    console.log(`${result.written ? "Downloaded" : "No change"}: ${result.path}`);
+  }
+
+  return `![${alt}](${BLOG_IMAGE_PUBLIC_PATH}/${slug}/${publicFilename})`;
+}
+
+async function blockToMarkdown(block, optionsOrDepth = 0) {
+  const options = typeof optionsOrDepth === "number" ? { depth: optionsOrDepth } : optionsOrDepth;
+  const depth = options.depth || 0;
   const type = block.type;
   const data = block[type];
   if (!data) return "";
@@ -256,6 +370,7 @@ function blockToMarkdown(block, depth = 0) {
     return `\n\`\`\`${language}\n${body}\n\`\`\`\n`;
   }
   if (type === "divider") return "---";
+  if (type === "image") return imageBlockToMarkdown(block, options.imageContext);
 
   return "";
 }
@@ -295,16 +410,18 @@ async function fetchAllDataSourcePages(token, dataSourceId, queryBody) {
   return all;
 }
 
-async function blocksToMarkdown(token, blockId, depth = 0) {
+async function blocksToMarkdown(token, blockId, optionsOrDepth = {}, depthArg = 0) {
+  const options = typeof optionsOrDepth === "number" ? {} : optionsOrDepth;
+  const depth = typeof optionsOrDepth === "number" ? optionsOrDepth : depthArg;
   const blocks = await fetchAllBlocks(token, blockId);
   const lines = [];
 
   for (const block of blocks) {
-    const line = blockToMarkdown(block, depth);
+    const line = await blockToMarkdown(block, { depth, imageContext: options });
     if (line) lines.push(line);
 
     if (block.has_children && ["bulleted_list_item", "numbered_list_item"].includes(block.type)) {
-      const childText = await blocksToMarkdown(token, block.id, depth + 1);
+      const childText = await blocksToMarkdown(token, block.id, options, depth + 1);
       if (childText) lines.push(childText);
     }
   }
@@ -376,7 +493,11 @@ async function main() {
   }
 
   for (const { page, fields } of targets) {
-    const bodyRaw = await blocksToMarkdown(notionToken, page.id);
+    const bodyRaw = await blocksToMarkdown(notionToken, page.id, {
+      dryRun,
+      slug: fields.slug,
+      title: fields.title,
+    });
     const body = normalizeMarkdown(bodyRaw || "(本文なし)");
 
     const pubDate = toDateOnly(new Date(fields.publishAt));
@@ -406,7 +527,7 @@ async function main() {
   console.log(`Done. Processed ${targets.length} page(s).`);
 }
 
-main().catch((err) => {
+function handleMainError(err) {
   if (isNotionNotFoundError(err)) {
     console.error(err.message || err);
     console.error(
@@ -417,4 +538,18 @@ main().catch((err) => {
 
   console.error(err.message || err);
   process.exit(1);
-});
+}
+
+const cliEntry = process.argv[1] ? pathToFileURL(path.resolve(process.argv[1])).href : "";
+if (import.meta.url === cliEntry) {
+  main().catch(handleMainError);
+}
+
+export {
+  blockToMarkdown,
+  blocksToMarkdown,
+  downloadImage,
+  inferImageExtensionFromContentType,
+  inferImageExtensionFromUrl,
+  normalizeMarkdown,
+};
