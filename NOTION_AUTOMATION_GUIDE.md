@@ -8,6 +8,7 @@
 
 - `scripts/notion-sync.mjs` が Notion DB を読み取り、`src/content/blog/*.md` を生成します。
 - 対象は `Status=Scheduled` かつ `PublishAt <= 現在時刻` のページです。
+- 本文の画像ブロックは `public/images/blog/{slug}/` に保存し、Markdown では `/images/blog/{slug}/{filename}` を参照します。
 
 1. 定期同期と手動同期
 
@@ -16,7 +17,7 @@
 
 1. 変更があるときだけ自動コミット
 
-- 同期後に `src/content/blog` 配下へ差分がある場合のみ、GitHub Actions が自動コミットします。
+- 同期後に `src/content/blog` または `public/images/blog` 配下へ差分がある場合のみ、GitHub Actions が自動コミットします。
 
 1. 既存デプロイへの自動接続
 
@@ -131,3 +132,6 @@ NOTION_TOKEN=xxx NOTION_DATA_SOURCE_ID=xxx pnpm notion:sync
 - `NOTION_TOKEN` / `NOTION_DATABASE_ID` 未設定だと同期は失敗します。
 - `DISCORD_WEBHOOK_URL` は任意です。未設定なら通知はスキップされます。
 - Cloudflare Pages の Git 連携と GitHub Actions デプロイを両方有効にすると二重デプロイになる可能性があります。
+- `HeroImage` は URL プロパティのまま扱います。本文画像のローカル保存とは別の仕組みです。
+- Notion から本文画像を削除しても、`public/images/blog/{slug}/` に保存済みの画像は自動削除されません。
+- 画像が増えてリポジトリサイズが大きくなった場合は、Cloudflare R2 / Images への移行を検討してください。

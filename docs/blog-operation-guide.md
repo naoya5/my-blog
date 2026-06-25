@@ -27,10 +27,12 @@ Cloudflare Pages (本番デプロイ)
 | PublishAt | 日付 | 公開日時（この日時を過ぎると同期対象になる） |
 | Draft | チェックボックス | チェックなし = 公開 / チェックあり = 下書き |
 
+本文に貼った Notion の画像ブロックは、同期時に `public/images/blog/{slug}/` へ保存され、記事 Markdown では `/images/blog/{slug}/{block-id}.{ext}` を参照します。`HeroImage` は引き続き URL プロパティとして扱い、本文画像とは別管理です。
+
 ### 2. 自動公開の流れ
 
 1. `PublishAt` の日時が来ると、次の10分間隔の同期で記事が検出される
-2. GitHub Actions が `src/content/blog/{slug}.md` をコミット & プッシュ
+2. GitHub Actions が `src/content/blog/{slug}.md` と本文画像をコミット & プッシュ
 3. 自動的に Cloudflare Pages へデプロイが走る
 4. 数十秒後にブログに記事が反映される
 
@@ -63,6 +65,15 @@ GitHub Actions の「Sync Scheduled Posts from Notion」を手動実行する。
 
 - 一度同期された記事の **内容変更やdraft値の変更は再同期されない**
 - 既存記事を更新したい場合は、GitHub 側で直接編集する
+- Notion 側で本文画像を削除しても、既存の `public/images/blog/{slug}/` 内の画像は自動削除されない
+
+### 本文画像について
+
+- 同期対象は Notion 本文の画像ブロック
+- 保存先は `public/images/blog/{slug}/`
+- ファイル名は Notion block ID を基本にし、URL や `Content-Type` から拡張子を決める
+- 同じ画像を再同期した場合、内容が同一なら上書きしない
+- 画像が増えてリポジトリサイズが大きくなる場合は、Cloudflare R2 / Images への移行を検討する
 
 ### デプロイのトリガー
 

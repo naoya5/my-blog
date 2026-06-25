@@ -16,6 +16,12 @@
 - `tags` (string[], 既定 `[]`) / `category` (enum `"deep-dive" | "daily"`, 既定 `"deep-dive"`)
 - `draft` (boolean, 既定 `false`) — 本番ビルドで除外(`getSortedPosts` が `import.meta.env.PROD` 時にフィルタ)。
 
+## Notion 本文画像規約
+- Notion 同期時、本文の `image` ブロックは `public/images/blog/<slug>/` に保存する。
+- Markdown 参照は `/images/blog/<slug>/<filename>`。ファイル名は Notion block ID を基本にし、拡張子は `Content-Type` または URL pathname から推定する。
+- `image.external.url` と `image.file.url` の両方を扱う。Notion の期限付き `file.url` へ公開ページから直接依存しない。
+- `HeroImage` は frontmatter の URL 契約を維持し、本文画像の保存処理とは分ける。
+
 ## 動的ルート規約(`src/pages/`)
 - ファイル名のブラケットがパラメータ: `[slug]`(個別記事) / `[tag]`(タグ別) / `[page]`(ページネーション, 6件/頁) / `[...slug]`(OG 画像の rest)。
 - 各ページは `getStaticPaths()` で全 route をビルド時に列挙し、`params`(URL) と `props`(描画データ)を分離して返す。関連記事のような派生データは `getStaticPaths` 内で**事前計算**して props で渡す。
