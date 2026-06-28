@@ -2,7 +2,7 @@
 title: 'AIにコードを任せるほど、ドキュメントが重要になる — ハーネスエンジニアリングと自作ツールの設計'
 description: 'ハーネスエンジニアリングの実践ガイド'
 pubDate: 2026-06-22
-updatedDate: 2026-06-28
+updatedDate: 2026-06-29
 tags: ['AI', 'Harness']
 draft: false
 ---
