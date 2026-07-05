@@ -1,0 +1,92 @@
+---
+// 記事末尾のシェアリンク（X intent / はてなブックマーク / URL コピー）。
+// canonical URL は Astro.site + パスから生成する（末尾スラッシュ必須）。
+interface Props {
+  url: string;
+  title: string;
+}
+
+const { url, title } = Astro.props as Props;
+
+const xShareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`;
+const hatenaShareUrl = `https://b.hatena.ne.jp/add?mode=confirm&url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`;
+---
+
+<div class="share-links" data-share-url={url}>
+  <span class="share-label">Share</span>
+
+  <a
+    class="share-btn"
+    href={xShareUrl}
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Xでシェア"
+    title="Xでシェア"
+  >
+    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M18.9 2H22l-7.6 8.7L23.3 22h-7l-5.5-7.2L4.5 22H1.4l8.2-9.3L1 2h7.2l5 6.6L18.9 2Zm-1.2 18h1.7L7.4 3.9H5.6L17.7 20Z" />
+    </svg>
+  </a>
+
+  <a
+    class="share-btn"
+    href={hatenaShareUrl}
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="はてなブックマークに追加"
+    title="はてなブックマークに追加"
+  >
+    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M4 3h16a1 1 0 011 1v16a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1Zm7.1 6.6c-.9 0-1.6.2-2.1.6-.5.4-.7.9-.7 1.5 0 .5.1.9.4 1.2.3.3.7.5 1.3.7l1 .3c.4.1.6.3.6.5 0 .3-.3.5-.9.5-.4 0-.8-.1-1.1-.3-.3-.2-.5-.4-.6-.7l-1.4.7c.2.6.6 1 1.1 1.3.5.3 1.2.5 2 .5 1 0 1.8-.2 2.3-.6.5-.4.8-1 .8-1.6 0-.5-.1-.9-.4-1.2-.3-.3-.7-.5-1.3-.7l-1-.3c-.4-.1-.6-.3-.6-.5 0-.3.3-.4.8-.4.4 0 .7.1 1 .2.3.1.5.3.6.6l1.3-.7c-.2-.5-.6-.9-1-1.1-.5-.3-1.1-.4-1.7-.4Zm5.4.1h-1.7v7.6h1.7v-2.6h.9c1.7 0 2.8-.9 2.8-2.5s-1.1-2.5-2.8-2.5h-.9Zm0 1.4h.8c.8 0 1.2.4 1.2 1.1s-.4 1.1-1.2 1.1h-.8v-2.2Z" />
+    </svg>
+  </a>
+
+  <button
+    type="button"
+    class="share-btn"
+    data-copy-url-trigger
+    aria-label="記事のURLをコピー"
+    title="URLをコピー"
+  >
+    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="9" y="9" width="12" height="12" rx="2" />
+      <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+    </svg>
+    <span class="share-copy-label" data-copy-url-label>URLをコピー</span>
+  </button>
+</div>
+
+<script>
+  // URL コピーボタンの初期化。View Transitions 後も再バインドする。
+  function initShareCopyButtons() {
+    const buttons = document.querySelectorAll<HTMLButtonElement>('[data-copy-url-trigger]');
+
+    buttons.forEach((button) => {
+      if (button.dataset.copyBound === '1') return;
+      button.dataset.copyBound = '1';
+
+      button.addEventListener('click', async () => {
+        const container = button.closest<HTMLElement>('[data-share-url]');
+        const url = container?.dataset.shareUrl;
+        const label = button.querySelector<HTMLElement>('[data-copy-url-label]');
+        if (!url) return;
+
+        try {
+          await navigator.clipboard.writeText(url);
+          if (label) label.textContent = 'コピーしました ✓';
+          button.classList.add('share-btn-success');
+        } catch {
+          if (label) label.textContent = 'コピーに失敗しました';
+        }
+
+        window.setTimeout(() => {
+          if (label) label.textContent = 'URLをコピー';
+          button.classList.remove('share-btn-success');
+        }, 2000);
+      });
+    });
+  }
+
+  initShareCopyButtons();
+  document.addEventListener('astro:page-load', initShareCopyButtons);
+</script>
