@@ -291,5 +291,9 @@ const breadcrumbSchema = {
     initCodeCopyButtons();
   }
 
+  // module script は defer 相当で astro:page-load(DOMContentLoaded 時に発火)より
+  // 先に実行されるとは限らないため、初回はここで直接呼び、以降の View Transitions
+  // 遷移分は astro:page-load で再初期化する(Header.astro 等と同じパターン)。
+  initBlogPostInteractions();
   document.addEventListener('astro:page-load', initBlogPostInteractions);
 </script>
