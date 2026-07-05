@@ -255,6 +255,100 @@
     background: rgba(var(--surface), 0.98);
   }
 
+  .mobile-menu-toggle {
+    @apply inline-flex h-11 w-11 items-center justify-center rounded-xl border transition-colors;
+    border-color: rgba(var(--line), 0.9);
+    background: rgba(var(--surface), 0.86);
+    color: rgb(var(--text-muted));
+  }
+
+  .mobile-menu-toggle:hover {
+    color: rgb(var(--text-main));
+    border-color: rgba(var(--accent), 0.45);
+    background: rgba(var(--surface), 0.98);
+  }
+
+  .mobile-menu-dialog {
+    width: min(360px, calc(100vw - 2rem));
+    margin: 5.5rem 1rem 0 auto;
+    border: none;
+    background: transparent;
+    padding: 0;
+    color: rgb(var(--text-main));
+  }
+
+  .mobile-menu-dialog::backdrop {
+    background: rgba(2, 6, 23, 0.5);
+    backdrop-filter: blur(4px);
+  }
+
+  .mobile-menu-panel {
+    @apply flex flex-col gap-5 rounded-3xl p-5;
+    max-height: min(80vh, 640px);
+    overflow: auto;
+  }
+
+  .mobile-menu-head {
+    @apply flex items-center justify-between gap-4;
+  }
+
+  .mobile-menu-close {
+    @apply inline-flex items-center rounded-xl border px-3 py-1.5 text-sm font-semibold transition-colors;
+    border-color: rgba(var(--line), 0.9);
+    background: rgba(var(--surface), 0.9);
+    color: rgb(var(--text-muted));
+  }
+
+  .mobile-menu-close:hover {
+    color: rgb(var(--text-main));
+    border-color: rgba(var(--accent), 0.45);
+  }
+
+  .mobile-menu-list {
+    @apply flex flex-col gap-1;
+  }
+
+  .mobile-menu-link {
+    @apply block rounded-xl px-3 py-2.5 text-base font-semibold transition-colors;
+    color: rgb(var(--text-main));
+  }
+
+  .mobile-menu-link:hover,
+  .mobile-menu-link:focus-visible {
+    background: rgba(var(--surface-2), 0.95);
+  }
+
+  .mobile-menu-link[aria-current='page'] {
+    background: rgba(var(--accent), 0.14);
+    color: rgb(var(--accent));
+  }
+
+  .mobile-menu-action {
+    @apply flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-semibold transition-colors;
+    border-color: rgba(var(--line), 0.9);
+    background: rgba(var(--surface), 0.86);
+    color: rgb(var(--text-muted));
+  }
+
+  .mobile-menu-action:hover {
+    color: rgb(var(--text-main));
+    border-color: rgba(var(--accent), 0.45);
+  }
+
+  .mobile-menu-utility {
+    @apply flex flex-wrap gap-x-4 gap-y-2 border-t pt-4;
+    border-color: rgba(var(--line), 0.85);
+  }
+
+  .mobile-menu-utility-link {
+    @apply text-sm font-medium transition-colors;
+    color: rgb(var(--text-muted));
+  }
+
+  .mobile-menu-utility-link:hover {
+    color: rgb(var(--accent));
+  }
+
   html.dark .site-mark {
     color: rgb(241 245 249);
   }
