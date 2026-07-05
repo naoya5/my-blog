@@ -44,8 +44,30 @@ export default defineConfig({
       [
         rehypeAutolinkHeadings,
         {
-          behavior: 'wrap',
-          properties: { className: ['anchor-link'] },
+          // 見出し全体をリンクにする wrap ではなく、末尾にアイコンを追加してホバー時のみ見せる。
+          // テキストノードではなく SVG アイコンにするのは、Astro の getHeadings() が
+          // ここから見出しテキストを抽出するため（テキストを足すと目次に記号が混入する）。
+          behavior: 'append',
+          properties: { className: ['anchor-link'], ariaLabel: 'この見出しへのリンク' },
+          content: {
+            type: 'element',
+            tagName: 'svg',
+            properties: { viewBox: '0 0 24 24', width: '14', height: '14', 'aria-hidden': 'true', focusable: 'false' },
+            children: [
+              {
+                type: 'element',
+                tagName: 'path',
+                properties: {
+                  d: 'M9 17H7a5 5 0 010-10h2M15 7h2a5 5 0 010 10h-2M8 12h8',
+                  fill: 'none',
+                  stroke: 'currentColor',
+                  'stroke-width': '1.8',
+                  'stroke-linecap': 'round',
+                },
+                children: [],
+              },
+            ],
+          },
         },
       ],
     ],

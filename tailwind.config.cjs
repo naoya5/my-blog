@@ -2,6 +2,9 @@
 module.exports = {
   content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
   darkMode: 'class',
+  // astro.config.mjs の rehype-autolink-headings がビルド時に付与するクラスなので、
+  // content のソーススキャンでは見つからず purge されてしまう。safelist で明示的に残す。
+  safelist: ['anchor-link'],
   theme: {
     extend: {
       colors: {
