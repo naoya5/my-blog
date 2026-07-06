@@ -567,6 +567,17 @@
     @apply rounded-2xl border;
     border-color: rgb(var(--line));
     box-shadow: none;
+    background-color: rgb(var(--surface-2)) !important;
+  }
+
+  .prose pre.astro-code,
+  .prose pre.astro-code span {
+    color: var(--shiki-light);
+  }
+
+  html.dark .prose pre.astro-code,
+  html.dark .prose pre.astro-code span {
+    color: var(--shiki-dark);
   }
 
   .code-block {
