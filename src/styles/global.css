@@ -9,26 +9,26 @@
     --font-display: 'Playfair Display', 'Times New Roman', serif;
     --font-body: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Yu Gothic', sans-serif;
 
-    --bg-canvas: 247 243 237;
-    --text-main: 32 30 27;
-    --text-muted: 96 90 82;
-    --surface: 255 255 255;
-    --surface-2: 243 238 231;
-    --line: 219 211 201;
-    --accent: 135 90 58;
-    --accent-soft: 241 230 218;
-    --shadow-color: 0 0 0;
+    --bg-canvas: 246 242 233;
+    --text-main: 53 49 42;
+    --text-muted: 109 102 90;
+    --surface: 253 251 246;
+    --surface-2: 239 233 219;
+    --line: 224 215 194;
+    --accent: 138 124 94;
+    --accent-soft: 236 229 212;
+    --shadow-color: 38 36 31;
   }
 
   html.dark {
-    --bg-canvas: 22 24 27;
-    --text-main: 231 226 220;
-    --text-muted: 164 156 145;
-    --surface: 31 33 37;
-    --surface-2: 41 43 47;
-    --line: 71 72 76;
-    --accent: 205 163 129;
-    --accent-soft: 69 56 45;
+    --bg-canvas: 28 26 23;
+    --text-main: 230 226 217;
+    --text-muted: 173 165 151;
+    --surface: 36 33 29;
+    --surface-2: 44 41 36;
+    --line: 58 54 47;
+    --accent: 197 180 141;
+    --accent-soft: 58 52 40;
     --shadow-color: 0 0 0;
   }
 
@@ -41,7 +41,7 @@
     @apply antialiased selection:bg-brand-200 selection:text-brand-900 dark:selection:bg-brand-800 dark:selection:text-brand-100;
     font-family: var(--font-body);
     color: rgb(var(--text-main));
-    line-height: 1.72;
+    line-height: 1.8;
     min-height: 100vh;
     background:
       linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent 24rem),
@@ -55,7 +55,7 @@
   }
 
   a {
-    @apply transition-all duration-200;
+    @apply transition-colors duration-150;
   }
 }
 
@@ -148,6 +148,15 @@
 
   .nav-link[aria-current='page'] {
     @apply text-brand-600 dark:text-brand-400 font-semibold;
+  }
+
+  .footer-link {
+    @apply transition-colors duration-150;
+    color: rgb(var(--text-muted));
+  }
+
+  .footer-link:hover {
+    color: rgb(var(--accent));
   }
 
   .site-mark {
@@ -496,7 +505,7 @@
 
   .read-progress-bar {
     @apply fixed inset-x-0 top-0 z-[60] h-[3px] origin-left scale-x-0;
-    background: rgb(var(--accent));
+    background: rgba(var(--accent), 0.7);
     transform: scaleX(0);
   }
 
@@ -544,12 +553,31 @@
   .prose {
     color: rgb(var(--text-main));
     max-width: 68ch;
+    font-size: 17px;
+    line-height: 1.9;
+    letter-spacing: 0.02em;
+  }
+
+  .prose p {
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
   }
 
   .prose pre {
     @apply rounded-2xl border;
     border-color: rgb(var(--line));
     box-shadow: none;
+    background-color: rgb(var(--surface-2)) !important;
+  }
+
+  .prose pre.astro-code,
+  .prose pre.astro-code span {
+    color: var(--shiki-light);
+  }
+
+  html.dark .prose pre.astro-code,
+  html.dark .prose pre.astro-code span {
+    color: var(--shiki-dark);
   }
 
   .code-block {
@@ -629,7 +657,7 @@
   }
 
   .markdown-alert {
-    @apply my-6 rounded-2xl border-l-8 p-4 shadow-sm !important;
+    @apply my-6 rounded-2xl border-l-8 p-4 !important;
   }
 
   .section-kicker {
@@ -669,20 +697,9 @@
   }
 
   .list-divider {
-    border-top: 1px solid rgba(32, 30, 27, 0.24);
-    border-bottom: 1px solid rgba(32, 30, 27, 0.24);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.32),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.22);
+    border-top: 1px solid rgb(var(--line));
+    border-bottom: 1px solid rgb(var(--line));
     margin-top: -1px;
-  }
-
-  html.dark .list-divider {
-    border-top-color: rgba(231, 226, 220, 0.18);
-    border-bottom-color: rgba(231, 226, 220, 0.18);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.06),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.04);
   }
 
   .home-hero {
