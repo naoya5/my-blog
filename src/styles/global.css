@@ -41,7 +41,7 @@
     @apply antialiased selection:bg-brand-200 selection:text-brand-900 dark:selection:bg-brand-800 dark:selection:text-brand-100;
     font-family: var(--font-body);
     color: rgb(var(--text-main));
-    line-height: 1.72;
+    line-height: 1.8;
     min-height: 100vh;
     background:
       linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent 24rem),
