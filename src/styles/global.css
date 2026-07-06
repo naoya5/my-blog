@@ -9,26 +9,26 @@
     --font-display: 'Playfair Display', 'Times New Roman', serif;
     --font-body: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Yu Gothic', sans-serif;
 
-    --bg-canvas: 247 243 237;
-    --text-main: 32 30 27;
-    --text-muted: 96 90 82;
-    --surface: 255 255 255;
-    --surface-2: 243 238 231;
-    --line: 219 211 201;
-    --accent: 135 90 58;
-    --accent-soft: 241 230 218;
-    --shadow-color: 0 0 0;
+    --bg-canvas: 246 242 233;
+    --text-main: 53 49 42;
+    --text-muted: 109 102 90;
+    --surface: 253 251 246;
+    --surface-2: 239 233 219;
+    --line: 224 215 194;
+    --accent: 138 124 94;
+    --accent-soft: 236 229 212;
+    --shadow-color: 38 36 31;
   }
 
   html.dark {
-    --bg-canvas: 22 24 27;
-    --text-main: 231 226 220;
-    --text-muted: 164 156 145;
-    --surface: 31 33 37;
-    --surface-2: 41 43 47;
-    --line: 71 72 76;
-    --accent: 205 163 129;
-    --accent-soft: 69 56 45;
+    --bg-canvas: 28 26 23;
+    --text-main: 230 226 217;
+    --text-muted: 173 165 151;
+    --surface: 36 33 29;
+    --surface-2: 44 41 36;
+    --line: 58 54 47;
+    --accent: 197 180 141;
+    --accent-soft: 58 52 40;
     --shadow-color: 0 0 0;
   }
 
