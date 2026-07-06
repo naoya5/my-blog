@@ -17,13 +17,9 @@
     --pagefind-ui-border-radius: 12px;
   }
 
-  html.dark {
-    --pagefind-ui-primary: rgb(125 211 252);
-    --pagefind-ui-text: rgb(241 245 249);
-    --pagefind-ui-background: rgb(15 23 42 / 0.92);
-    --pagefind-ui-border: rgb(71 85 105 / 0.75);
-    --pagefind-ui-tag: rgb(30 41 59);
-  }
+  /* html.dark 専用の上書きは持たない: 上の変数はすべて --accent / --text-main /
+     --surface / --line / --surface-2 を参照しており、html.dark での値切り替えだけで
+     自動的にダーク配色へ追従する（二重管理を避ける）。 */
 
   .pagefind-ui__search-input {
     @apply font-sans !important;

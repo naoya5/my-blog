@@ -12,20 +12,30 @@ import { SITE_AUTHOR, SITE_LANG, SITE_TITLE } from '../../consts';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog', ({ data }) => (import.meta.env.PROD ? !data.draft : true));
+  // 公開日降順（新着が先頭）。前後記事ナビはこの並びを基準にする。
+  const sortedPosts = [...posts].sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
-  return posts.map((post) => ({
+  return sortedPosts.map((post, index) => ({
     params: { slug: post.slug },
-    // 関連記事はここで算出して渡す（本文側で getCollection を再実行しない）。
-    props: { post, relatedPosts: getRelatedPosts(post, posts) },
+    props: {
+      post,
+      // 関連記事はここで算出して渡す（本文側で getCollection を再実行しない）。
+      relatedPosts: getRelatedPosts(post, posts),
+      // 新しい記事が前(prev)、古い記事が次(next)。
+      prevPost: index > 0 ? sortedPosts[index - 1] : null,
+      nextPost: index < sortedPosts.length - 1 ? sortedPosts[index + 1] : null,
+    },
   }));
 }
 
 interface Props {
   post: CollectionEntry<'blog'>;
   relatedPosts: CollectionEntry<'blog'>[];
+  prevPost: CollectionEntry<'blog'> | null;
+  nextPost: CollectionEntry<'blog'> | null;
 }
 
-const { post, relatedPosts } = Astro.props as Props;
+const { post, relatedPosts, prevPost, nextPost } = Astro.props as Props;
 const { Content, headings } = await post.render();
 const heroImage = post.data.heroImage;
 
@@ -82,62 +92,85 @@ const breadcrumbSchema = {
 >
   <JsonLd schema={[articleSchema, breadcrumbSchema]} />
 
-  <article data-pagefind-body class="mx-auto max-w-3xl">
-    <header class="border-b pb-10" style="border-color: rgb(var(--line));">
-      <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-semibold uppercase tracking-[0.24em]" style="color: rgb(var(--text-muted));">
-        <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
-        {post.data.updatedDate && <span>Updated {formatDate(post.data.updatedDate)}</span>}
-        <ReadingTime content={post.body} />
-      </div>
+  <div class="lg:grid lg:grid-cols-[minmax(0,1fr)_240px] lg:items-start lg:gap-12">
+    <article data-pagefind-body class="mx-auto max-w-3xl lg:mx-0 lg:max-w-none">
+      <header class="border-b pb-10" style="border-color: rgb(var(--line));">
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-semibold uppercase tracking-[0.24em]" style="color: rgb(var(--text-muted));">
+          <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+          {post.data.updatedDate && <span>Updated {formatDate(post.data.updatedDate)}</span>}
+          <ReadingTime content={post.body} />
+        </div>
 
-      <h1 class="mt-5 text-balance text-4xl leading-tight sm:text-5xl" style="font-family: var(--font-display);" data-pagefind-meta="title">
-        {post.data.title}
-      </h1>
+        <h1 class="mt-5 text-balance text-4xl leading-tight sm:text-5xl" style="font-family: var(--font-display);" data-pagefind-meta="title">
+          {post.data.title}
+        </h1>
 
-      <p class="mt-5 text-base leading-8 sm:text-lg" style="color: rgb(var(--text-muted));">
-        {post.data.description}
-      </p>
+        <p class="mt-5 text-base leading-8 sm:text-lg" style="color: rgb(var(--text-muted));">
+          {post.data.description}
+        </p>
 
-      <div class="mt-6 flex flex-wrap gap-2">
-        {post.data.tags.map((tag) => <Tag name={tag} />)}
-      </div>
+        <div class="mt-6 flex flex-wrap gap-2">
+          {post.data.tags.map((tag) => <Tag name={tag} />)}
+        </div>
 
-      {heroImage && (
-        <div class="mt-10 overflow-hidden rounded-2xl border" style="border-color: rgb(var(--line));">
-          {typeof heroImage === 'string' ? (
-            <img
-              src={heroImage}
-              alt={post.data.title}
-              width="1200"
-              height="630"
-              class="aspect-[21/9] w-full object-cover"
-              loading="eager"
-              decoding="async"
-            />
-          ) : (
-            <Image
-              src={heroImage}
-              alt={post.data.title}
-              width={1200}
-              height={630}
-              class="aspect-[21/9] w-full object-cover"
-              loading="eager"
-            />
-          )}
+        {heroImage && (
+          <div class="mt-10 overflow-hidden rounded-2xl border" style="border-color: rgb(var(--line));">
+            {typeof heroImage === 'string' ? (
+              <img
+                src={heroImage}
+                alt={post.data.title}
+                width="1200"
+                height="630"
+                class="aspect-[21/9] w-full object-cover"
+                loading="eager"
+                decoding="async"
+              />
+            ) : (
+              <Image
+                src={heroImage}
+                alt={post.data.title}
+                width={1200}
+                height={630}
+                class="aspect-[21/9] w-full object-cover"
+                loading="eager"
+              />
+            )}
+          </div>
+        )}
+      </header>
+
+      {headings.length > 0 && (
+        <div class="mt-8 lg:hidden">
+          <TableOfContents headings={headings} collapsible />
         </div>
       )}
-    </header>
+
+      <div class="prose mt-10 dark:prose-invert">
+        <Content />
+      </div>
+
+      <nav class="mt-16 grid gap-4 border-t pt-8 sm:grid-cols-2" style="border-color: rgb(var(--line));" aria-label="前後の記事">
+        {prevPost ? (
+          <a href={`/blog/${prevPost.slug}/`} class="post-nav-link">
+            <span class="post-nav-label">← 前の記事</span>
+            <span class="post-nav-title">{prevPost.data.title}</span>
+          </a>
+        ) : <span />}
+        {nextPost ? (
+          <a href={`/blog/${nextPost.slug}/`} class="post-nav-link sm:text-right">
+            <span class="post-nav-label">次の記事 →</span>
+            <span class="post-nav-title">{nextPost.data.title}</span>
+          </a>
+        ) : <span />}
+      </nav>
+    </article>
 
     {headings.length > 0 && (
-      <div class="mt-8">
+      <aside class="hidden lg:sticky lg:top-28 lg:block lg:self-start">
         <TableOfContents headings={headings} />
-      </div>
+      </aside>
     )}
-
-    <div class="prose prose-slate mt-10 dark:prose-invert">
-      <Content />
-    </div>
-  </article>
+  </div>
 
   {relatedPosts.length > 0 && (
     <section class="mx-auto mt-16 max-w-3xl border-t pt-8" style="border-color: rgb(var(--line));">
@@ -163,3 +196,104 @@ const breadcrumbSchema = {
     </section>
   )}
 </BaseLayout>
+
+<script>
+  // 目次のスクロールスパイ（現在表示中の見出しをハイライト）とコードブロックのコピー
+  // ボタンをまとめて初期化する。通常の <script> はバンドルされ CSP のインライン
+  // ハッシュ管理が不要なため、astro:page-load で View Transitions 後も再初期化する。
+  const TOC_OBSERVER_KEY = '__blogTocObserver';
+  const COPY_RESET_TIMER_KEY = '__blogCodeCopyResetTimers';
+
+  function initTocScrollSpy() {
+    const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'));
+    const existingObserver = (window as any)[TOC_OBSERVER_KEY] as IntersectionObserver | undefined;
+    existingObserver?.disconnect();
+
+    if (links.length === 0) return;
+
+    const targets = links
+      .map((link) => {
+        const id = link.getAttribute('data-toc-target');
+        const heading = id ? document.getElementById(id) : null;
+        return heading ? { id: id as string, heading } : null;
+      })
+      .filter((entry): entry is { id: string; heading: HTMLElement } => entry !== null);
+
+    if (targets.length === 0) return;
+
+    const setActive = (id: string) => {
+      links.forEach((link) => {
+        if (link.getAttribute('data-toc-target') === id) {
+          link.setAttribute('aria-current', 'true');
+        } else {
+          link.removeAttribute('aria-current');
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActive(entry.target.id);
+          }
+        });
+      },
+      { rootMargin: '-15% 0px -70% 0px', threshold: 0 },
+    );
+
+    targets.forEach(({ heading }) => observer.observe(heading));
+    (window as any)[TOC_OBSERVER_KEY] = observer;
+  }
+
+  function initCodeCopyButtons() {
+    const blocks = document.querySelectorAll<HTMLPreElement>('.prose pre');
+
+    blocks.forEach((pre) => {
+      if (pre.dataset.copyBound === '1') return;
+      pre.dataset.copyBound = '1';
+      pre.classList.add('code-block');
+
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'code-copy-btn';
+      button.setAttribute('aria-label', 'コードをコピー');
+      button.textContent = 'Copy';
+      pre.appendChild(button);
+
+      button.addEventListener('click', async () => {
+        const code = pre.querySelector('code');
+        const text = (code ?? pre).innerText;
+
+        try {
+          await navigator.clipboard.writeText(text);
+          button.textContent = 'Copied ✓';
+          button.classList.add('code-copy-btn-success');
+        } catch {
+          button.textContent = 'Failed';
+        }
+
+        const timers = ((window as any)[COPY_RESET_TIMER_KEY] ??= new Map<HTMLButtonElement, number>());
+        const existingTimer = timers.get(button);
+        if (existingTimer) window.clearTimeout(existingTimer);
+        const timer = window.setTimeout(() => {
+          button.textContent = 'Copy';
+          button.classList.remove('code-copy-btn-success');
+          timers.delete(button);
+        }, 2000);
+        timers.set(button, timer);
+      });
+    });
+  }
+
+  function initBlogPostInteractions() {
+    initTocScrollSpy();
+    initCodeCopyButtons();
+  }
+
+  // module script は defer 相当で astro:page-load(DOMContentLoaded 時に発火)より
+  // 先に実行されるとは限らないため、初回はここで直接呼び、以降の View Transitions
+  // 遷移分は astro:page-load で再初期化する(Header.astro 等と同じパターン)。
+  initBlogPostInteractions();
+  document.addEventListener('astro:page-load', initBlogPostInteractions);
+</script>

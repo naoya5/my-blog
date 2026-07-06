@@ -7,25 +7,42 @@ interface Heading {
 
 interface Props {
   headings: Heading[];
+  // true: <details> で折りたたむモバイル/タブレット用。false: lg以上のサイドレール用（追従・スクロールスパイ対象）。
+  collapsible?: boolean;
 }
 
-const { headings } = Astro.props;
+const { headings, collapsible = false } = Astro.props;
 const visibleHeadings = headings.filter((heading) => heading.depth >= 2 && heading.depth <= 3);
 ---
 
 {
   visibleHeadings.length > 0 && (
-    <nav class="rounded-2xl border px-5 py-5" aria-label="目次" style="border-color: rgb(var(--line)); background: rgba(var(--surface), 0.45);">
-      <h2 class="mb-4 text-xs font-semibold uppercase tracking-[0.24em]" style="color: rgb(var(--text-muted));">目次</h2>
-      <ul class="space-y-2">
-        {visibleHeadings.map((heading) => (
-          <li class={heading.depth === 3 ? 'ml-4 text-sm' : 'text-sm'}>
-            <a href={`#${heading.slug}`} class="transition-colors hover:text-[rgb(var(--accent))]" style="color: rgb(var(--text-muted));">
-              {heading.text}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </nav>
+    collapsible ? (
+      <details class="toc-details">
+        <summary class="toc-summary">目次</summary>
+        <ul class="toc-list">
+          {visibleHeadings.map((heading) => (
+            <li class={heading.depth === 3 ? 'toc-item toc-item-sub' : 'toc-item'}>
+              <a href={`#${heading.slug}`} class="toc-link" data-toc-link data-toc-target={heading.slug}>
+                {heading.text}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </details>
+    ) : (
+      <nav class="toc-nav" aria-label="目次">
+        <h2 class="toc-nav-title">目次</h2>
+        <ul class="toc-list">
+          {visibleHeadings.map((heading) => (
+            <li class={heading.depth === 3 ? 'toc-item toc-item-sub' : 'toc-item'}>
+              <a href={`#${heading.slug}`} class="toc-link" data-toc-link data-toc-target={heading.slug}>
+                {heading.text}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )
   )
 }

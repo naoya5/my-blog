@@ -104,29 +104,8 @@
     padding-inline: 0.2rem;
   }
 
-  html.dark .pagefind-ui__search-input {
-    border-color: rgb(71 85 105 / 0.8);
-    background: rgb(15 23 42 / 0.9);
-    color: rgb(241 245 249);
-  }
-
-  html.dark .pagefind-ui__search-input::placeholder {
-    color: rgb(148 163 184 / 0.92);
-  }
-
-  html.dark .pagefind-ui__result {
-    border-color: rgb(71 85 105 / 0.72);
-    background: rgb(15 23 42 / 0.92);
-  }
-
-  html.dark .pagefind-ui__result-link,
-  html.dark .pagefind-ui__result-title {
-    color: rgb(241 245 249);
-  }
-
-  html.dark .pagefind-ui__result-excerpt {
-    color: rgb(203 213 225);
-  }
+  /* html.dark 専用の上書きは削除済み: 上のベースルールが --surface / --line / --text-main /
+     --text-muted を参照しており、html.dark での変数切り替えだけで自動的にダーク配色へ追従する。 */
 
   .site-shell {
     @apply min-h-screen flex flex-col;
@@ -255,72 +234,109 @@
     background: rgba(var(--surface), 0.98);
   }
 
-  html.dark .site-mark {
-    color: rgb(241 245 249);
+  .mobile-menu-toggle {
+    @apply inline-flex h-11 w-11 items-center justify-center rounded-xl border transition-colors;
+    border-color: rgba(var(--line), 0.9);
+    background: rgba(var(--surface), 0.86);
+    color: rgb(var(--text-muted));
   }
 
-  html.dark .site-mark:hover {
-    color: rgb(255 255 255);
+  .mobile-menu-toggle:hover {
+    color: rgb(var(--text-main));
+    border-color: rgba(var(--accent), 0.45);
+    background: rgba(var(--surface), 0.98);
   }
+
+  .mobile-menu-dialog {
+    width: min(360px, calc(100vw - 2rem));
+    margin: 5.5rem 1rem 0 auto;
+    border: none;
+    background: transparent;
+    padding: 0;
+    color: rgb(var(--text-main));
+  }
+
+  .mobile-menu-dialog::backdrop {
+    background: rgba(2, 6, 23, 0.5);
+    backdrop-filter: blur(4px);
+  }
+
+  .mobile-menu-panel {
+    @apply flex flex-col gap-5 rounded-3xl p-5;
+    max-height: min(80vh, 640px);
+    overflow: auto;
+  }
+
+  .mobile-menu-head {
+    @apply flex items-center justify-between gap-4;
+  }
+
+  .mobile-menu-close {
+    @apply inline-flex items-center rounded-xl border px-3 py-1.5 text-sm font-semibold transition-colors;
+    border-color: rgba(var(--line), 0.9);
+    background: rgba(var(--surface), 0.9);
+    color: rgb(var(--text-muted));
+  }
+
+  .mobile-menu-close:hover {
+    color: rgb(var(--text-main));
+    border-color: rgba(var(--accent), 0.45);
+  }
+
+  .mobile-menu-list {
+    @apply flex flex-col gap-1;
+  }
+
+  .mobile-menu-link {
+    @apply block rounded-xl px-3 py-2.5 text-base font-semibold transition-colors;
+    color: rgb(var(--text-main));
+  }
+
+  .mobile-menu-link:hover,
+  .mobile-menu-link:focus-visible {
+    background: rgba(var(--surface-2), 0.95);
+  }
+
+  .mobile-menu-link[aria-current='page'] {
+    background: rgba(var(--accent), 0.14);
+    color: rgb(var(--accent));
+  }
+
+  .mobile-menu-action {
+    @apply flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-semibold transition-colors;
+    border-color: rgba(var(--line), 0.9);
+    background: rgba(var(--surface), 0.86);
+    color: rgb(var(--text-muted));
+  }
+
+  .mobile-menu-action:hover {
+    color: rgb(var(--text-main));
+    border-color: rgba(var(--accent), 0.45);
+  }
+
+  .mobile-menu-utility {
+    @apply flex flex-wrap gap-x-4 gap-y-2 border-t pt-4;
+    border-color: rgba(var(--line), 0.85);
+  }
+
+  .mobile-menu-utility-link {
+    @apply text-sm font-medium transition-colors;
+    color: rgb(var(--text-muted));
+  }
+
+  .mobile-menu-utility-link:hover {
+    color: rgb(var(--accent));
+  }
+
+  /* html.dark .site-mark / .floating-nav-link / .floating-search / .shortcut-hint /
+     .floating-icon-btn / #theme-toggle の色上書きは削除済み: 上のベースルールが
+     --text-main / --text-muted / --line / --surface / --accent を参照しているため、
+     html.dark の変数切り替えだけで自動的にダーク配色へ追従する。 */
 
   html.dark .header-pill {
-    border-color: rgba(148, 163, 184, 0.2);
+    border-color: rgba(var(--line), 0.5);
     background: rgba(var(--surface), 0.84);
     box-shadow: 0 10px 28px -24px rgba(0, 0, 0, 0.72);
-  }
-
-  html.dark .floating-nav-link {
-    color: rgb(226 232 240);
-  }
-
-  html.dark .floating-nav-link:hover {
-    @apply bg-slate-700/60 text-white;
-  }
-
-  html.dark .floating-nav-link[aria-current='page'] {
-    @apply bg-slate-700 text-sky-200;
-  }
-
-  html.dark .floating-search {
-    color: rgb(203 213 225);
-    border-color: rgba(148, 163, 184, 0.28);
-    background: rgba(15, 23, 42, 0.55);
-  }
-
-  html.dark .floating-search:hover {
-    @apply text-slate-100;
-    border-color: rgba(125, 211, 252, 0.45);
-    background: rgba(15, 23, 42, 0.72);
-  }
-
-  html.dark .shortcut-hint {
-    @apply text-slate-400;
-    background: rgba(15, 23, 42, 0.9);
-    border-color: rgba(148, 163, 184, 0.22);
-  }
-
-  html.dark .floating-icon-btn {
-    color: rgb(203 213 225);
-    border-color: rgba(148, 163, 184, 0.3);
-    background: rgba(15, 23, 42, 0.55);
-  }
-
-  html.dark .floating-icon-btn:hover {
-    @apply text-slate-100;
-    border-color: rgba(125, 211, 252, 0.45);
-    background: rgba(15, 23, 42, 0.75);
-  }
-
-  html.dark .header-pill #theme-toggle {
-    color: rgb(203 213 225);
-    border-color: rgba(148, 163, 184, 0.3);
-    background: rgba(15, 23, 42, 0.55);
-  }
-
-  html.dark .header-pill #theme-toggle:hover {
-    @apply text-slate-100;
-    border-color: rgba(125, 211, 252, 0.45);
-    background: rgba(15, 23, 42, 0.75);
   }
 
   .site-search-dialog {
@@ -361,17 +377,81 @@
     border-color: rgba(var(--accent), 0.45);
   }
 
-  html.dark .search-modal-close {
-    color: rgb(203 213 225);
-    border-color: rgba(148, 163, 184, 0.3);
-    background: rgba(15, 23, 42, 0.55);
+  /* html.dark .search-modal-close の色上書きは削除済み: ベースルールが --text-muted /
+     --line / --surface / --text-main / --accent を参照しており自動追従する。 */
+
+  .toc-nav {
+    @apply rounded-2xl border px-5 py-5;
+    border-color: rgb(var(--line));
+    background: rgba(var(--surface), 0.45);
   }
 
-  html.dark .search-modal-close:hover {
-    @apply text-slate-100;
+  .toc-nav-title {
+    @apply mb-4 text-xs font-semibold uppercase tracking-[0.24em];
+    color: rgb(var(--text-muted));
+  }
 
-    border-color: rgba(125, 211, 252, 0.45);
-    background: rgba(15, 23, 42, 0.75);
+  .toc-details {
+    @apply rounded-2xl border px-5 py-4;
+    border-color: rgb(var(--line));
+    background: rgba(var(--surface), 0.45);
+  }
+
+  .toc-summary {
+    @apply cursor-pointer text-xs font-semibold uppercase tracking-[0.24em];
+    color: rgb(var(--text-muted));
+  }
+
+  .toc-details[open] .toc-summary {
+    margin-bottom: 1rem;
+  }
+
+  .toc-list {
+    @apply space-y-2;
+  }
+
+  .toc-item {
+    @apply text-sm;
+  }
+
+  .toc-item-sub {
+    @apply ml-4 text-sm;
+  }
+
+  .toc-link {
+    @apply block border-l-2 pl-3 py-0.5 transition-colors;
+    border-color: transparent;
+    color: rgb(var(--text-muted));
+  }
+
+  .toc-link:hover {
+    color: rgb(var(--accent));
+  }
+
+  .toc-link[aria-current='true'] {
+    border-color: rgb(var(--accent));
+    color: rgb(var(--accent));
+    font-weight: 600;
+  }
+
+  .post-nav-link {
+    @apply flex flex-col gap-1 rounded-2xl border px-4 py-3 transition-colors;
+    border-color: rgb(var(--line));
+  }
+
+  .post-nav-link:hover {
+    border-color: rgba(var(--accent), 0.4);
+    background: rgba(var(--accent-soft), 0.35);
+  }
+
+  .post-nav-label {
+    @apply text-[11px] font-semibold uppercase tracking-[0.2em];
+    color: rgb(var(--text-muted));
+  }
+
+  .post-nav-title {
+    @apply text-sm font-semibold;
+    color: rgb(var(--text-main));
   }
 
   .chip {
@@ -420,6 +500,39 @@
     box-shadow: none;
   }
 
+  .code-block {
+    position: relative;
+  }
+
+  .code-copy-btn {
+    @apply absolute right-3 top-3 rounded-lg border px-2.5 py-1 text-xs font-semibold opacity-0 transition-all duration-150;
+    border-color: rgba(var(--line), 0.9);
+    background: rgba(var(--surface), 0.92);
+    color: rgb(var(--text-muted));
+  }
+
+  .code-block:hover .code-copy-btn,
+  .code-copy-btn:focus-visible {
+    opacity: 1;
+  }
+
+  .code-copy-btn:hover {
+    color: rgb(var(--text-main));
+    border-color: rgba(var(--accent), 0.45);
+  }
+
+  .code-copy-btn-success {
+    opacity: 1;
+    color: rgb(var(--accent));
+    border-color: rgba(var(--accent), 0.5);
+  }
+
+  @media (max-width: 640px) {
+    .code-copy-btn {
+      opacity: 1;
+    }
+  }
+
   .prose h2 {
     @apply mt-14 mb-5 border-b pb-3;
     border-color: rgb(var(--line));
@@ -427,6 +540,28 @@
 
   .prose h3 {
     @apply mt-10 mb-4;
+  }
+
+  .prose h2,
+  .prose h3 {
+    scroll-margin-top: 6.5rem;
+  }
+
+  .anchor-link {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    margin-left: 0.375rem;
+    text-decoration: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    color: rgb(var(--accent));
+  }
+
+  .prose h2:hover .anchor-link,
+  .prose h3:hover .anchor-link,
+  .anchor-link:focus-visible {
+    opacity: 1;
   }
 
   .prose p,

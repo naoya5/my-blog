@@ -4,6 +4,7 @@ import ThemeToggle from './ThemeToggle.astro';
 const navItems = [
   { href: '/blog/', label: 'Blog' },
   { href: '/blog/page/1/', label: 'Archive' },
+  { href: '/about/', label: 'About' },
 ];
 
 const utilityLinks = [
@@ -69,10 +70,74 @@ const activePath = Astro.url.pathname;
             }
           </a>
         ))}
+
+        <button
+          type="button"
+          id="mobile-menu-toggle"
+          class="mobile-menu-toggle md:hidden"
+          aria-expanded="false"
+          aria-controls="mobile-menu-dialog"
+          aria-label="メニューを開く"
+        >
+          <svg data-menu-icon="open" class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+          </svg>
+          <svg data-menu-icon="close" class="hidden h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+          </svg>
+        </button>
       </div>
     </div>
   </div>
 </header>
+
+<dialog id="mobile-menu-dialog" class="mobile-menu-dialog" aria-label="サイトメニュー">
+  <div class="mobile-menu-panel card-surface" role="document">
+    <div class="mobile-menu-head">
+      <span class="site-mark">Agentic Signal</span>
+      <button type="button" class="mobile-menu-close" data-mobile-menu-close aria-label="メニューを閉じる">
+        閉じる
+      </button>
+    </div>
+
+    <nav aria-label="Mobile Primary">
+      <ul class="mobile-menu-list">
+        {navItems.map((item) => (
+          <li>
+            <a
+              class="mobile-menu-link"
+              href={item.href}
+              aria-current={activePath === item.href ? 'page' : undefined}
+              data-mobile-menu-navlink
+            >
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <button type="button" class="mobile-menu-action" data-mobile-menu-search-trigger>
+      <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <path d="M13.5 13.5L18 18M15.5 8.5a7 7 0 11-14 0 7 7 0 0114 0z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+      </svg>
+      <span>サイト内検索を開く</span>
+    </button>
+
+    <div class="mobile-menu-utility">
+      {utilityLinks.map((item) => (
+        <a
+          class="mobile-menu-utility-link"
+          href={item.href}
+          target={item.external ? '_blank' : undefined}
+          rel={item.external ? 'noopener noreferrer' : undefined}
+        >
+          {item.label}
+        </a>
+      ))}
+    </div>
+  </div>
+</dialog>
 
 <script is:inline>
   const HANDLER_KEY = '__siteHeaderScrollHandler';
@@ -166,10 +231,138 @@ const activePath = Astro.url.pathname;
     window.addEventListener('keydown', onSearchShortcut);
   }
 
+  const MOBILE_MENU_TOGGLE_KEY = '__siteHeaderMobileMenuToggleHandler';
+  const MOBILE_MENU_CLOSE_KEY = '__siteHeaderMobileMenuCloseHandler';
+  const MOBILE_MENU_DIALOG_CLICK_KEY = '__siteHeaderMobileMenuDialogClickHandler';
+  const MOBILE_MENU_CANCEL_KEY = '__siteHeaderMobileMenuCancelHandler';
+  const MOBILE_MENU_CLOSE_EVENT_KEY = '__siteHeaderMobileMenuCloseEventHandler';
+  const MOBILE_MENU_NAVLINK_KEY = '__siteHeaderMobileMenuNavlinkHandler';
+  const MOBILE_MENU_SEARCH_KEY = '__siteHeaderMobileMenuSearchHandler';
+  const MOBILE_MENU_RESIZE_KEY = '__siteHeaderMobileMenuResizeHandler';
+  const MOBILE_MENU_OPEN_CLASS = 'search-modal-open';
+
+  function getMobileMenuDialog() {
+    const dialog = document.getElementById('mobile-menu-dialog');
+    return dialog instanceof HTMLDialogElement ? dialog : null;
+  }
+
+  function setMobileMenuToggleState(isOpen) {
+    const toggle = document.getElementById('mobile-menu-toggle');
+    if (!toggle) return;
+    toggle.setAttribute('aria-expanded', String(isOpen));
+    const openIcon = toggle.querySelector('[data-menu-icon="open"]');
+    const closeIcon = toggle.querySelector('[data-menu-icon="close"]');
+    openIcon?.classList.toggle('hidden', isOpen);
+    closeIcon?.classList.toggle('hidden', !isOpen);
+  }
+
+  function openMobileMenu() {
+    const dialog = getMobileMenuDialog();
+    if (!dialog) return;
+    if (!dialog.open) dialog.showModal();
+    document.documentElement.classList.add(MOBILE_MENU_OPEN_CLASS);
+    setMobileMenuToggleState(true);
+    const firstLink = dialog.querySelector('[data-mobile-menu-navlink]');
+    if (firstLink instanceof HTMLElement) {
+      window.requestAnimationFrame(() => firstLink.focus());
+    }
+  }
+
+  function closeMobileMenu() {
+    const dialog = getMobileMenuDialog();
+    if (!dialog) return;
+    if (dialog.open) dialog.close();
+    document.documentElement.classList.remove(MOBILE_MENU_OPEN_CLASS);
+    setMobileMenuToggleState(false);
+  }
+
+  function mountMobileMenu() {
+    const toggle = document.getElementById('mobile-menu-toggle');
+    const dialog = getMobileMenuDialog();
+    const closeButton = dialog?.querySelector('[data-mobile-menu-close]');
+    if (!toggle || !dialog || !(closeButton instanceof HTMLButtonElement)) return;
+
+    if (typeof window[MOBILE_MENU_TOGGLE_KEY] === 'function') {
+      toggle.removeEventListener('click', window[MOBILE_MENU_TOGGLE_KEY]);
+    }
+    if (typeof window[MOBILE_MENU_CLOSE_KEY] === 'function') {
+      closeButton.removeEventListener('click', window[MOBILE_MENU_CLOSE_KEY]);
+    }
+    if (typeof window[MOBILE_MENU_DIALOG_CLICK_KEY] === 'function') {
+      dialog.removeEventListener('click', window[MOBILE_MENU_DIALOG_CLICK_KEY]);
+    }
+    if (typeof window[MOBILE_MENU_CANCEL_KEY] === 'function') {
+      dialog.removeEventListener('cancel', window[MOBILE_MENU_CANCEL_KEY]);
+    }
+    if (typeof window[MOBILE_MENU_CLOSE_EVENT_KEY] === 'function') {
+      dialog.removeEventListener('close', window[MOBILE_MENU_CLOSE_EVENT_KEY]);
+    }
+
+    const onToggleClick = () => {
+      if (dialog.open) {
+        closeMobileMenu();
+      } else {
+        openMobileMenu();
+      }
+    };
+    const onCloseClick = () => closeMobileMenu();
+    const onDialogClick = (event) => {
+      if (event.target === dialog) closeMobileMenu();
+    };
+    const onDialogClose = () => {
+      document.documentElement.classList.remove(MOBILE_MENU_OPEN_CLASS);
+      setMobileMenuToggleState(false);
+    };
+    const onDialogCancel = onDialogClose;
+
+    window[MOBILE_MENU_TOGGLE_KEY] = onToggleClick;
+    window[MOBILE_MENU_CLOSE_KEY] = onCloseClick;
+    window[MOBILE_MENU_DIALOG_CLICK_KEY] = onDialogClick;
+    window[MOBILE_MENU_CANCEL_KEY] = onDialogCancel;
+    window[MOBILE_MENU_CLOSE_EVENT_KEY] = onDialogClose;
+
+    toggle.addEventListener('click', onToggleClick);
+    closeButton.addEventListener('click', onCloseClick);
+    dialog.addEventListener('click', onDialogClick);
+    dialog.addEventListener('cancel', onDialogCancel);
+    dialog.addEventListener('close', onDialogClose);
+
+    const navLinks = dialog.querySelectorAll('[data-mobile-menu-navlink]');
+    if (typeof window[MOBILE_MENU_NAVLINK_KEY] === 'function') {
+      navLinks.forEach((link) => link.removeEventListener('click', window[MOBILE_MENU_NAVLINK_KEY]));
+    }
+    const onNavLinkClick = () => closeMobileMenu();
+    window[MOBILE_MENU_NAVLINK_KEY] = onNavLinkClick;
+    navLinks.forEach((link) => link.addEventListener('click', onNavLinkClick));
+
+    const searchTrigger = dialog.querySelector('[data-mobile-menu-search-trigger]');
+    if (typeof window[MOBILE_MENU_SEARCH_KEY] === 'function') {
+      searchTrigger?.removeEventListener('click', window[MOBILE_MENU_SEARCH_KEY]);
+    }
+    const onSearchTriggerClick = () => {
+      closeMobileMenu();
+      requestSiteSearchOpen();
+    };
+    window[MOBILE_MENU_SEARCH_KEY] = onSearchTriggerClick;
+    searchTrigger?.addEventListener('click', onSearchTriggerClick);
+
+    if (typeof window[MOBILE_MENU_RESIZE_KEY] === 'function') {
+      window.removeEventListener('resize', window[MOBILE_MENU_RESIZE_KEY]);
+    }
+    const mediaQuery = window.matchMedia('(min-width: 768px)');
+    const onResize = () => {
+      if (mediaQuery.matches) closeMobileMenu();
+    };
+    window[MOBILE_MENU_RESIZE_KEY] = onResize;
+    window.addEventListener('resize', onResize);
+  }
+
   mountScrollAwareHeader();
   mountHeaderSearchTrigger();
   mountSearchShortcut();
+  mountMobileMenu();
   document.addEventListener('astro:after-swap', mountScrollAwareHeader);
   document.addEventListener('astro:after-swap', mountHeaderSearchTrigger);
   document.addEventListener('astro:after-swap', mountSearchShortcut);
+  document.addEventListener('astro:after-swap', mountMobileMenu);
 </script>

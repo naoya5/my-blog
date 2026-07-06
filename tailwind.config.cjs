@@ -2,21 +2,27 @@
 module.exports = {
   content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
   darkMode: 'class',
+  // astro.config.mjs の rehype-autolink-headings がビルド時に付与するクラスなので、
+  // content のソーススキャンでは見つからず purge されてしまう。safelist で明示的に残す。
+  safelist: ['anchor-link'],
   theme: {
     extend: {
       colors: {
+        // 色の真実の源は src/styles/global.css の CSS 変数（--accent 等）。
+        // ここでは Tailwind のユーティリティクラス（brand-*）から同じ変数を参照するだけで、
+        // 独自の色値は持たない（ライト/ダークは html.dark の変数切り替えで自動追従する）。
         brand: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
-          950: '#082f49',
+          50: 'rgb(var(--accent-soft))',
+          100: 'rgb(var(--text-main))',
+          200: 'rgb(var(--accent-soft))',
+          300: 'rgb(var(--accent))',
+          400: 'rgb(var(--accent))',
+          500: 'rgb(var(--accent))',
+          600: 'rgb(var(--accent))',
+          700: 'rgb(var(--accent))',
+          800: 'rgb(var(--accent-soft))',
+          900: 'rgb(var(--text-main))',
+          950: 'rgb(var(--text-main))',
         },
       },
       animation: {
@@ -39,25 +45,27 @@ module.exports = {
         },
       },
       typography: (theme) => ({
+        // DEFAULT/invert 共通で CSS 変数を参照する。html.dark 切り替えで自動的に
+        // ダーク配色へ追従するため、invert 側は accent 系だけ明示すれば十分。
         DEFAULT: {
           css: {
-            '--tw-prose-body': theme('colors.slate.700'),
-            '--tw-prose-headings': theme('colors.slate.900'),
-            '--tw-prose-links': theme('colors.brand.600'),
-            '--tw-prose-bold': theme('colors.slate.900'),
+            '--tw-prose-body': 'rgb(var(--text-main))',
+            '--tw-prose-headings': 'rgb(var(--text-main))',
+            '--tw-prose-links': 'rgb(var(--accent))',
+            '--tw-prose-bold': 'rgb(var(--text-main))',
             '--tw-prose-code': theme('colors.pink.700'),
-            '--tw-prose-quotes': theme('colors.slate.800'),
-            '--tw-prose-quote-borders': theme('colors.brand.300'),
+            '--tw-prose-quotes': 'rgb(var(--text-main))',
+            '--tw-prose-quote-borders': 'rgb(var(--accent))',
             a: {
               textDecoration: 'none',
               fontWeight: '500',
-              borderBottom: `1px solid ${theme('colors.brand.200')}`,
+              borderBottom: '1px solid rgba(var(--accent), 0.35)',
               transition: 'all 0.2s ease',
             },
             'a:hover': {
-              color: theme('colors.brand.700'),
-              borderBottomColor: theme('colors.brand.500'),
-              backgroundColor: theme('colors.brand.50'),
+              color: 'rgb(var(--accent))',
+              borderBottomColor: 'rgb(var(--accent))',
+              backgroundColor: 'rgba(var(--accent-soft), 0.6)',
             },
             'h1, h2, h3, h4': {
               letterSpacing: '-0.02em',
@@ -67,13 +75,13 @@ module.exports = {
         },
         invert: {
           css: {
-            '--tw-prose-body': theme('colors.slate.300'),
-            '--tw-prose-headings': theme('colors.slate.100'),
-            '--tw-prose-links': theme('colors.brand.400'),
-            '--tw-prose-quote-borders': theme('colors.brand.800'),
+            '--tw-prose-body': 'rgb(var(--text-main))',
+            '--tw-prose-headings': 'rgb(var(--text-main))',
+            '--tw-prose-links': 'rgb(var(--accent))',
+            '--tw-prose-quote-borders': 'rgb(var(--accent))',
             'a:hover': {
-              color: theme('colors.brand.300'),
-              backgroundColor: theme('colors.brand.950'),
+              color: 'rgb(var(--accent))',
+              backgroundColor: 'rgba(var(--accent-soft), 0.35)',
             },
           },
         },
