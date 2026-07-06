@@ -454,6 +454,58 @@
     color: rgb(var(--text-main));
   }
 
+  .share-links {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .share-label {
+    @apply mr-1 text-[11px] font-semibold uppercase tracking-[0.24em];
+    color: rgb(var(--text-muted));
+  }
+
+  .share-btn {
+    @apply inline-flex h-9 items-center gap-2 rounded-full border px-3 text-xs font-semibold transition-colors;
+    border-color: rgba(var(--line), 0.9);
+    background: rgba(var(--surface), 0.86);
+    color: rgb(var(--text-muted));
+  }
+
+  .share-btn:hover {
+    color: rgb(var(--text-main));
+    border-color: rgba(var(--accent), 0.45);
+    background: rgba(var(--surface), 0.98);
+  }
+
+  .share-btn-success {
+    color: rgb(var(--accent));
+    border-color: rgba(var(--accent), 0.5);
+  }
+
+  .share-copy-label {
+    white-space: nowrap;
+  }
+
+  .back-to-top {
+    @apply inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] transition-colors;
+    color: rgb(var(--text-muted));
+  }
+
+  .back-to-top:hover {
+    color: rgb(var(--accent));
+  }
+
+  .read-progress-bar {
+    @apply fixed inset-x-0 top-0 z-[60] h-[3px] origin-left scale-x-0;
+    background: rgb(var(--accent));
+    transform: scaleX(0);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .read-progress-bar {
+      transition: transform 0.1s linear;
+    }
+  }
+
   .chip {
     @apply inline-flex items-center px-0 py-0 text-[11px] font-medium transition-colors;
     color: rgb(var(--text-muted));
