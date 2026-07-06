@@ -544,6 +544,14 @@
   .prose {
     color: rgb(var(--text-main));
     max-width: 68ch;
+    font-size: 17px;
+    line-height: 1.9;
+    letter-spacing: 0.02em;
+  }
+
+  .prose p {
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
   }
 
   .prose pre {
