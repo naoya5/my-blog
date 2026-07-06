@@ -44,7 +44,7 @@ module.exports = {
           '50%': { transform: 'translateY(-20px)' },
         },
       },
-      typography: (theme) => ({
+      typography: () => ({
         // DEFAULT/invert 共通で CSS 変数を参照する。html.dark 切り替えで自動的に
         // ダーク配色へ追従するため、invert 側は accent 系だけ明示すれば十分。
         DEFAULT: {
@@ -53,14 +53,14 @@ module.exports = {
             '--tw-prose-headings': 'rgb(var(--text-main))',
             '--tw-prose-links': 'rgb(var(--accent))',
             '--tw-prose-bold': 'rgb(var(--text-main))',
-            '--tw-prose-code': theme('colors.pink.700'),
+            '--tw-prose-code': 'rgb(var(--accent))',
             '--tw-prose-quotes': 'rgb(var(--text-main))',
             '--tw-prose-quote-borders': 'rgb(var(--accent))',
             a: {
               textDecoration: 'none',
               fontWeight: '500',
               borderBottom: '1px solid rgba(var(--accent), 0.35)',
-              transition: 'all 0.2s ease',
+              transition: 'color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease',
             },
             'a:hover': {
               color: 'rgb(var(--accent))',
