@@ -7,6 +7,7 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeSlug from 'rehype-slug';
 import remarkLinkCard from 'remark-link-card-plus';
 import { remarkAlert } from 'remark-github-blockquote-alert';
+import remarkXEmbed from './src/plugins/remark-x-embed.ts';
 import {
   transformerMetaHighlight,
   transformerNotationDiff,
@@ -38,7 +39,11 @@ export default defineConfig({
         transformerMetaHighlight(),
       ],
     },
-    remarkPlugins: [[remarkLinkCard, { cache: true, shortenUrl: true, thumbnailPosition: 'right' }], remarkAlert],
+    remarkPlugins: [
+      [remarkLinkCard, { cache: true, shortenUrl: true, thumbnailPosition: 'right' }],
+      remarkAlert,
+      remarkXEmbed,
+    ],
     rehypePlugins: [
       rehypeSlug,
       [
