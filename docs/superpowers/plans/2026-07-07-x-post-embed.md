@@ -109,7 +109,7 @@ interface XEmbedData {
   dateText: string;
 }
 
-const X_URL_REGEX = /^https?:\/\/(?:x\.com|twitter\.com)\/([^/]+)\/status\/(\d+)/;
+const X_URL_REGEX = /^https?:\/\/(?:x\.com|twitter\.com)\/([^/]+)\/status\/(\d+)(?:[\?#].*)?$/;
 
 function isStandaloneXUrl(node: Paragraph): string | null {
   if (node.children.length !== 1) return null;
@@ -162,35 +162,54 @@ async function fetchOEmbed(url: string): Promise<OEmbedResponse | null> {
   }
 }
 
-function parseOEmbed(data: OEmbedResponse): XEmbedData | null {
-  const authorUrlMatch = data.author_url.match(/https?:\/\/(?:x\.com|twitter\.com)\/([^/]+)\/?$/);
+function parseOEmbed(data: unknown): XEmbedData | null {
+  if (typeof data !== 'object' || data === null) return null;
+  const { url, author_name: authorName, author_url: authorUrl, html } = data as OEmbedResponse;
+  if (typeof url !== 'string' || typeof authorName !== 'string' || typeof authorUrl !== 'string' || typeof html !== 'string') {
+    return null;
+  }
+
+  const authorUrlMatch = authorUrl.match(/https?:\/\/(?:x\.com|twitter\.com)\/([^/]+)\/?$/);
   const handle = authorUrlMatch?.[1] ?? '';
-  const textMatch = data.html.match(/<p[^>]*>(.*?)<\/p>/is);
+  const textMatch = html.match(/<p[^>]*>(.*?)<\/p>/is);
   const text = textMatch?.[1] ?? '';
-  const dateMatch = data.html.match(/<\/p>.*?<a[^>]*href="[^"]*"[^>]*>(.*?)<\/a>/is);
+  const dateMatch = html.match(/<\/p>.*?<a[^>]*href="[^"]*"[^>]*>(.*?)<\/a>/is);
   const dateText = dateMatch?.[1] ?? '';
 
   if (!handle || !text) return null;
 
   return {
-    url: data.url,
-    authorName: data.author_name,
+    url,
+    authorName,
     authorHandle: handle,
-    authorUrl: data.author_url,
+    authorUrl,
     text,
     dateText,
   };
 }
 
 function sanitizeTweetHtml(html: string): string {
-  // Allow only <a> and <br> tags from the trusted oEmbed response.
-  return html.replace(/<([\/]?)([a-zA-Z0-9]+)[^>]*>/g, (match, _slash, tag) => {
+  return html.replace(/<([\/]?)([a-zA-Z0-9]+)(\s[^>]*)?>/g, (match, _slash, tag, attrs) => {
     const normalizedTag = tag.toLowerCase();
-    if (normalizedTag === 'br' || normalizedTag === 'a') {
-      return match;
+    if (normalizedTag === 'br') return '<br>';
+    if (normalizedTag === 'a') {
+      if (_slash) return match;
+      const hrefMatch = attrs?.match(/href=["']([^"']*)["']/);
+      const rawHref = hrefMatch ? hrefMatch[1] : '';
+      const href = rawHref ? escapeHtml(decodeHtmlEntities(rawHref)) : '';
+      return href ? `<a href="${href}" rel="noopener noreferrer">` : '<a>';
     }
     return match.replace(/</g, '&lt;').replace(/>/g, '&gt;');
   });
+}
+
+function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
 }
 
 function escapeHtml(text: string): string {
