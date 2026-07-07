@@ -725,6 +725,54 @@
     font-size: 1.85rem;
     font-weight: 700;
   }
+
+  .x-embed-card {
+    @apply my-6 rounded-2xl border p-5;
+    border-color: rgb(var(--line));
+    background: rgba(var(--surface), 0.72);
+  }
+
+  .x-embed-header {
+    @apply mb-3 flex flex-wrap items-baseline gap-2;
+  }
+
+  .x-embed-author {
+    @apply font-semibold;
+    color: rgb(var(--text-main));
+  }
+
+  .x-embed-handle {
+    @apply text-sm;
+    color: rgb(var(--text-muted));
+  }
+
+  .x-embed-body {
+    @apply my-0 border-0 pl-0;
+    color: rgb(var(--text-main));
+  }
+
+  .x-embed-body p {
+    @apply my-0;
+    line-height: 1.7;
+  }
+
+  .x-embed-footer {
+    @apply mt-3 text-sm;
+    color: rgb(var(--text-muted));
+  }
+
+  .x-embed-footer a {
+    @apply no-underline transition-colors;
+    color: rgb(var(--text-muted));
+  }
+
+  .x-embed-footer a:hover {
+    color: rgb(var(--accent));
+  }
+
+  .x-embed-card-fallback {
+    @apply p-4;
+  }
 }
 
 /* Custom Utilities */
