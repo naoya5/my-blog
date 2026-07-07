@@ -287,9 +287,9 @@ Add to `markdown.remarkPlugins` array:
 
 ```javascript
 remarkPlugins: [
+  remarkXEmbed,
   [remarkLinkCard, { cache: true, shortenUrl: true, thumbnailPosition: 'right' }],
   remarkAlert,
-  remarkXEmbed,
 ],
 ```
 
@@ -416,7 +416,7 @@ Create `src/content/blog/x-embed-test.md`:
 title: 'X Embed Test'
 description: 'X post embed feature test fixture.'
 pubDate: 2026-07-07
-draft: true
+draft: false
 tags: ['test']
 ---
 
