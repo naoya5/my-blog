@@ -40,9 +40,9 @@ export default defineConfig({
       ],
     },
     remarkPlugins: [
+      remarkXEmbed,
       [remarkLinkCard, { cache: true, shortenUrl: true, thumbnailPosition: 'right' }],
       remarkAlert,
-      remarkXEmbed,
     ],
     rehypePlugins: [
       rehypeSlug,
