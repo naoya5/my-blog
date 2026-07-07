@@ -21,7 +21,7 @@ interface XEmbedData {
   dateText: string;
 }
 
-const X_URL_REGEX = /^https?:\/\/(?:x\.com|twitter\.com)\/([^/]+)\/status\/(\d+)/;
+const X_URL_REGEX = /^https?:\/\/(?:x\.com|twitter\.com)\/([^/]+)\/status\/(\d+)(?:[\?#].*)?$/;
 
 function isStandaloneXUrl(node: Paragraph): string | null {
   if (node.children.length !== 1) return null;
@@ -74,9 +74,12 @@ async function fetchOEmbed(url: string): Promise<OEmbedResponse | null> {
   }
 }
 
-function parseOEmbed(data: OEmbedResponse): XEmbedData | null {
-  const { url, author_name: authorName, author_url: authorUrl, html } = data;
-  if (!url || !authorName || !authorUrl || !html) return null;
+function parseOEmbed(data: unknown): XEmbedData | null {
+  if (typeof data !== 'object' || data === null) return null;
+  const { url, author_name: authorName, author_url: authorUrl, html } = data as OEmbedResponse;
+  if (typeof url !== 'string' || typeof authorName !== 'string' || typeof authorUrl !== 'string' || typeof html !== 'string') {
+    return null;
+  }
 
   const authorUrlMatch = authorUrl.match(/https?:\/\/(?:x\.com|twitter\.com)\/([^/]+)\/?$/);
   const handle = authorUrlMatch?.[1] ?? '';
@@ -103,12 +106,22 @@ function sanitizeTweetHtml(html: string): string {
     if (normalizedTag === 'br') return '<br>';
     if (normalizedTag === 'a') {
       if (_slash) return match;
-      const hrefMatch = attrs?.match(/href="([^"]*)"/);
-      const href = hrefMatch ? escapeHtml(hrefMatch[1]) : '';
+      const hrefMatch = attrs?.match(/href=["']([^"']*)["']/);
+      const rawHref = hrefMatch ? hrefMatch[1] : '';
+      const href = rawHref ? escapeHtml(decodeHtmlEntities(rawHref)) : '';
       return href ? `<a href="${href}" rel="noopener noreferrer">` : '<a>';
     }
     return match.replace(/</g, '&lt;').replace(/>/g, '&gt;');
   });
+}
+
+function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
 }
 
 function escapeHtml(text: string): string {
