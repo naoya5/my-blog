@@ -30,6 +30,7 @@
     "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/typography": "^0.5.19",
     "@types/mdast": "^4.0.4",
+    "@types/unist": "^3.0.3",
     "pagefind": "^1.4.0",
     "rehype-autolink-headings": "^7.1.0",
     "rehype-slug": "^6.0.0",
