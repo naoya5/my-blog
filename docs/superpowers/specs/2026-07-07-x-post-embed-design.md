@@ -112,7 +112,7 @@ HTML 抽出は、oEmbed レスポンスの構造が固定であることを前�
   </blockquote>
   <footer class="x-embed-footer">
     <a href="https://x.com/handle/status/123" target="_blank" rel="noopener noreferrer">
-      <time datetime="2026-07-07">2026年7月7日</time> · Xで見る
+      <time>2026年7月7日</time> · Xで見る
     </a>
   </footer>
 </figure>
