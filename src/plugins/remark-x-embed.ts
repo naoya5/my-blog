@@ -2,7 +2,6 @@ import type { Html, Paragraph } from 'mdast';
 import type { Node, Parent } from 'unist';
 import { visit } from 'unist-util-visit';
 import { createHash } from 'node:crypto';
-import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 
 interface OEmbedResponse {
@@ -40,10 +39,20 @@ function getCachePath(url: string): string {
 
 async function loadFromCache(url: string): Promise<OEmbedResponse | null> {
   const path = getCachePath(url);
-  if (!existsSync(path)) return null;
   try {
     const raw = await readFile(path, 'utf-8');
-    return JSON.parse(raw) as OEmbedResponse;
+    const data = JSON.parse(raw);
+    if (
+      typeof data === 'object' &&
+      data !== null &&
+      typeof data.url === 'string' &&
+      typeof data.author_name === 'string' &&
+      typeof data.author_url === 'string' &&
+      typeof data.html === 'string'
+    ) {
+      return data as OEmbedResponse;
+    }
+    return null;
   } catch {
     return null;
   }
@@ -88,7 +97,8 @@ function parseOEmbed(data: unknown): XEmbedData | null {
   const dateMatch = html.match(/<\/p>.*?<a[^>]*href="[^"]*"[^>]*>(.*?)<\/a>/is);
   const dateText = dateMatch?.[1] ?? '';
 
-  if (!handle || !text) return null;
+  if (!handle || !text || !dateText) return null;
+  if (!url.match(/^https?:\/\//)) return null;
 
   return {
     url,
@@ -105,11 +115,15 @@ function sanitizeTweetHtml(html: string): string {
     const normalizedTag = tag.toLowerCase();
     if (normalizedTag === 'br') return '<br>';
     if (normalizedTag === 'a') {
-      if (_slash) return match;
       const hrefMatch = attrs?.match(/href=["']([^"']*)["']/);
       const rawHref = hrefMatch ? hrefMatch[1] : '';
-      const href = rawHref ? escapeHtml(decodeHtmlEntities(rawHref)) : '';
-      return href ? `<a href="${href}" rel="noopener noreferrer">` : '<a>';
+      const decodedHref = rawHref ? decodeHtmlEntities(rawHref) : '';
+      if (!decodedHref.match(/^https?:\/\//)) {
+        return match.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      }
+      if (_slash) return match;
+      const safeHref = escapeHtml(decodedHref);
+      return `<a href="${safeHref}" target="_blank" rel="noopener noreferrer">`;
     }
     return match.replace(/</g, '&lt;').replace(/>/g, '&gt;');
   });
