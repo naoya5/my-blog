@@ -115,13 +115,13 @@ function sanitizeTweetHtml(html: string): string {
     const normalizedTag = tag.toLowerCase();
     if (normalizedTag === 'br') return '<br>';
     if (normalizedTag === 'a') {
+      if (_slash) return match;
       const hrefMatch = attrs?.match(/href=["']([^"']*)["']/);
       const rawHref = hrefMatch ? hrefMatch[1] : '';
       const decodedHref = rawHref ? decodeHtmlEntities(rawHref) : '';
       if (!decodedHref.match(/^https?:\/\//)) {
         return match.replace(/</g, '&lt;').replace(/>/g, '&gt;');
       }
-      if (_slash) return match;
       const safeHref = escapeHtml(decodedHref);
       return `<a href="${safeHref}" target="_blank" rel="noopener noreferrer">`;
     }
