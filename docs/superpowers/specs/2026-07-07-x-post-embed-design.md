@@ -40,10 +40,11 @@ package.json  （依存追加）
 
 ### 1.1 依存
 
-プラグイン実装に必要な追加依存（推定）：
+プラグイン実装に必要な追加依存：
 
 - `unist-util-visit`：Markdown AST の走査
-- `@types/mdast`：型定義（ビルド時に必要）
+- `@types/mdast`：型定義
+- `@types/unist`：型定義（`Node` / `Parent` 用）
 
 これらは remark エコシステムに含まれるため、既存の `remarkPlugins` と同じ環境で動作する。
 
@@ -57,9 +58,9 @@ import remarkXEmbed from './src/plugins/remark-x-embed.ts';
 export default defineConfig({
   markdown: {
     remarkPlugins: [
+      remarkXEmbed,
       [remarkLinkCard, { /* ... */ }],
       remarkAlert,
-      remarkXEmbed,
     ],
   },
 });
@@ -74,7 +75,7 @@ export default defineConfig({
 - http も許可
 - クエリパラメータ・フラグメントは無視して status ID を抽出
 
-単独行の判定は、`remark-link-card-plus` と同じような方針で行う：段落ノード内にテキストがリンクのみであることを確認する。
+単独行の判定は、`remark-link-card-plus` と同じような方針で行う：段落ノード内にテキストがリンクのみであることを確認する。さらに、リンクテキストが URL と一致するベアリンクのみを対象とし、カスタムラベル付きリンク (`[Click here](...)`) は変換しない。
 
 ### 4. oEmbed 取得・パース
 
@@ -90,7 +91,7 @@ https://publish.twitter.com/oembed?url={encoded_url}&omit_script=true
 - `author_url`: `https://x.com/handle` 形式から handle を抽出
 - `html`: 内包する `<p>` から投稿本文、`<a>` から日付テキストを抽出
 
-HTML 抽出は、oEmbed レスポンスの構造が固定であることを前提に、軽量なパーサーまたは正規表現を使用する。出力時には本文を HTML エスケープし直す。
+HTML 抽出は、oEmbed レスポンスの構造が固定であることを前提に、軽量なパーサーまたは正規表現を使用する。投稿本文は `<p>` から、日付は `</p>` 以降の最初の `<a>` から抽出する。本文は信頼できる API 由来だが、`<a>` と `<br>` のみを許可し、それ以外のタグは HTML エスケープしてサニタイズする。
 
 ### 5. キャッシュ
 
@@ -154,7 +155,7 @@ HTML 抽出は、oEmbed レスポンスの構造が固定であることを前�
 
 - 新しいインライン `<script>` は追加しないため、`public/_headers` の `script-src` 変更は不要
 - 外部 JavaScript 読み込みは発生しない
-- 取得した投稿本文は HTML エスケープして出力する
+- 取得した投稿本文は `<a>` / `<br>` タグを許可しつつ HTML エスケープしてサニタイズする
 
 ### 10. テスト・検証
 

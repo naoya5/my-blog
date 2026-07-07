@@ -46,7 +46,7 @@
 Run:
 
 ```bash
-pnpm add -D unist-util-visit @types/mdast
+pnpm add -D unist-util-visit @types/mdast @types/unist
 ```
 
 Expected: `package.json` devDependencies updated and `pnpm-lock.yaml` changed.
@@ -86,7 +86,7 @@ Co-authored-by: factory-droid[bot] <138933559+factory-droid[bot]@users.noreply.g
 Create `src/plugins/remark-x-embed.ts` with the following content:
 
 ```typescript
-import type { Link, Paragraph } from 'mdast';
+import type { Html, Paragraph } from 'mdast';
 import type { Node, Parent } from 'unist';
 import { visit } from 'unist-util-visit';
 import { createHash } from 'node:crypto';
@@ -116,6 +116,8 @@ function isStandaloneXUrl(node: Paragraph): string | null {
   const child = node.children[0];
   if (child.type !== 'link') return null;
   if (child.children.length !== 1 || child.children[0].type !== 'text') return null;
+  const textNode = child.children[0];
+  if (textNode.value !== child.url) return null;
   return X_URL_REGEX.test(child.url) ? child.url : null;
 }
 
@@ -165,7 +167,7 @@ function parseOEmbed(data: OEmbedResponse): XEmbedData | null {
   const handle = authorUrlMatch?.[1] ?? '';
   const textMatch = data.html.match(/<p[^>]*>(.*?)<\/p>/is);
   const text = textMatch?.[1] ?? '';
-  const dateMatch = data.html.match(/<a[^>]*href="[^"]*"[^>]*>(.*?)<\/a>/is);
+  const dateMatch = data.html.match(/<\/p>.*?<a[^>]*href="[^"]*"[^>]*>(.*?)<\/a>/is);
   const dateText = dateMatch?.[1] ?? '';
 
   if (!handle || !text) return null;
@@ -178,6 +180,17 @@ function parseOEmbed(data: OEmbedResponse): XEmbedData | null {
     text,
     dateText,
   };
+}
+
+function sanitizeTweetHtml(html: string): string {
+  // Allow only <a> and <br> tags from the trusted oEmbed response.
+  return html.replace(/<([\/]?)([a-zA-Z0-9]+)[^>]*>/g, (match, _slash, tag) => {
+    const normalizedTag = tag.toLowerCase();
+    if (normalizedTag === 'br' || normalizedTag === 'a') {
+      return match;
+    }
+    return match.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  });
 }
 
 function escapeHtml(text: string): string {
@@ -197,7 +210,7 @@ function renderCard(data: XEmbedData): string {
     `    <span class="x-embed-handle">@${escapeHtml(data.authorHandle)}</span>`,
     '  </figcaption>',
     `  <blockquote class="x-embed-body" cite="${escapeHtml(data.url)}">`,
-    `    <p>${data.text}</p>`,
+    `    <p>${sanitizeTweetHtml(data.text)}</p>`,
     '  </blockquote>',
     '  <footer class="x-embed-footer">',
     `    <a href="${escapeHtml(data.url)}" target="_blank" rel="noopener noreferrer">`,
@@ -234,14 +247,15 @@ export default function remarkXEmbed() {
         const oembed = await fetchOEmbed(url);
         const data = oembed ? parseOEmbed(oembed) : null;
         const html = data ? renderCard(data) : renderFallback(url);
-        parent.children[index] = { type: 'html', value: html };
+        const htmlNode: Html = { type: 'html', value: html };
+        parent.children[index] = htmlNode;
       }),
     );
   };
 }
 ```
 
-Note: `data.text` comes from the trusted X oEmbed HTML and is used as-is so entities like `&quot;` render correctly. Author and date fields are re-escaped.
+Note: `data.text` comes from the trusted X oEmbed HTML. It is sanitized to allow only `<a>` and `<br>` tags; all other tags are escaped. Author and date fields are re-escaped.
 
 - [ ] **Step 2: Type check the plugin**
 
