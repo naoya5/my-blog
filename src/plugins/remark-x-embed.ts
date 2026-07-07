@@ -1,4 +1,4 @@
-import type { Link, Paragraph } from 'mdast';
+import type { Html, Paragraph } from 'mdast';
 import type { Node, Parent } from 'unist';
 import { visit } from 'unist-util-visit';
 import { createHash } from 'node:crypto';
@@ -146,7 +146,7 @@ export default function remarkXEmbed() {
         const oembed = await fetchOEmbed(url);
         const data = oembed ? parseOEmbed(oembed) : null;
         const html = data ? renderCard(data) : renderFallback(url);
-        const htmlNode = { type: 'html', value: html };
+        const htmlNode: Html = { type: 'html', value: html };
         parent.children[index] = htmlNode;
       }),
     );
