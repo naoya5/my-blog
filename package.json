@@ -3,10 +3,14 @@
   "type": "module",
   "version": "0.0.1",
   "packageManager": "pnpm@9.15.5",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro check && astro build && pagefind --site dist",
+    "test": "node --test",
     "preview": "astro preview",
     "deploy": "pnpm build && wrangler pages deploy ./dist",
     "notion:sync": "node scripts/notion-sync.mjs",

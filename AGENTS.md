@@ -10,12 +10,13 @@
 | セットアップ | `pnpm install --frozen-lockfile` |
 | 開発サーバー | `pnpm dev` |
 | ビルド | `pnpm build` （`astro check` → `astro build` → `pagefind --site dist`） |
+| テスト | `pnpm test` （Node.js 組み込みテストランナー） |
 | 型検査のみ | `pnpm astro check` |
 | プレビュー | `pnpm preview` |
 | デプロイ | `pnpm deploy` （build + `wrangler pages deploy ./dist`） |
 | Notion 同期 | `pnpm notion:sync` / `pnpm notion:sync:dry-run` |
 
-<!-- テストランナーは未導入。型検査(`astro check`)がビルドの最初のゲートを兼ねる。 -->
+<!-- PR CI は `pnpm test` と `pnpm build` の両方を必須ゲートとして実行する。 -->
 
 ## グローバル制約(全体に効くルール)
 - **ドメインは単一の真実の源**: `astro.config.mjs` の `site` (`https://my-blog-atw.pages.dev`)。canonical / OG / sitemap / robots.txt / RSS / JSON-LD はすべてここから派生する。ドメイン変更時はここだけを直す。
