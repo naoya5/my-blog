@@ -51,8 +51,10 @@ test("Search UI styles inherit light and dark theme tokens", () => {
   );
   assert.match(searchSource, /--pagefind-ui-background:\s*rgb\(var\(--surface\)\)/);
   assert.match(searchSource, /--pagefind-ui-border:\s*rgb\(var\(--line\)\)/);
-  assert.match(globalCss, /html\.dark\s*\{[\s\S]*?--surface:/);
-  assert.match(globalCss, /html\.dark\s*\{[\s\S]*?--line:/);
+  assert.match(globalCss, /:root\s*\{[^}]*--surface:/);
+  assert.match(globalCss, /:root\s*\{[^}]*--line:/);
+  assert.match(globalCss, /html\.dark\s*\{[^}]*--surface:/);
+  assert.match(globalCss, /html\.dark\s*\{[^}]*--line:/);
   assert.match(globalCss, /\.pagefind-ui__search-input::placeholder/);
-  assert.match(globalCss, /\.pagefind-ui__result\s*\{[\s\S]*?background:\s*rgb\(var\(--surface\)\)/);
+  assert.match(globalCss, /\.pagefind-ui__result\s*\{[^}]*background:\s*rgb\(var\(--surface\)\)/);
 });

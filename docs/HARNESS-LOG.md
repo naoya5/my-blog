@@ -33,6 +33,6 @@ harness-docs が行ったドキュメント体系の生成・更新・削除・�
 
 ## 2026-08-08 — CI HARDENING
 
-- changed : package.json / .github/workflows/pr-ci.yml — Node.js 組み込みテストランナーを `pnpm test` として公開し、Pull Request CI の必須ゲートへ追加
+- changed : package.json / .github/workflows/pr-ci.yml — Node.js 組み込みテストランナーの標準探索を `pnpm test` として公開し、認証情報を永続化しない Pull Request CI の必須ゲートへ追加
 - changed : tests/ui/search-fallback.test.mjs — 旧ダークモード専用色の期待値を、現在のセマンティックCSS変数によるテーマ継承契約へ更新
 - changed : AGENTS.md / docs/architecture.md — テストコマンドとPR検証フローを現行CIに同期
