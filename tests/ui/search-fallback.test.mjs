@@ -40,7 +40,7 @@ test("Search modal listens open event and mounts Pagefind UI", () => {
   assert.match(source, /data-search-modal-close/);
 });
 
-test("Dark mode search UI styles include contrast-oriented selectors", () => {
+test("Search UI styles inherit light and dark theme tokens", () => {
   const searchSource = fs.readFileSync(
     new URL("../../src/components/blog/Search.astro", import.meta.url),
     "utf8",
@@ -49,8 +49,10 @@ test("Dark mode search UI styles include contrast-oriented selectors", () => {
     new URL("../../src/styles/global.css", import.meta.url),
     "utf8",
   );
-  assert.match(searchSource, /html\.dark\s*\{[\s\S]*--pagefind-ui-background/);
-  assert.match(searchSource, /--pagefind-ui-border:\s*rgb\(71 85 105 \/ 0\.75\)/);
+  assert.match(searchSource, /--pagefind-ui-background:\s*rgb\(var\(--surface\)\)/);
+  assert.match(searchSource, /--pagefind-ui-border:\s*rgb\(var\(--line\)\)/);
+  assert.match(globalCss, /html\.dark\s*\{[\s\S]*?--surface:/);
+  assert.match(globalCss, /html\.dark\s*\{[\s\S]*?--line:/);
   assert.match(globalCss, /\.pagefind-ui__search-input::placeholder/);
-  assert.match(globalCss, /html\.dark\s+\.pagefind-ui__result/);
+  assert.match(globalCss, /\.pagefind-ui__result\s*\{[\s\S]*?background:\s*rgb\(var\(--surface\)\)/);
 });
