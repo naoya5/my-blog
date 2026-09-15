@@ -8,8 +8,8 @@ const latestPosts = posts.slice(0, 5);
 ---
 
 <BaseLayout
-  title="Agentic Signal | AIエージェント開発の実践知"
-  description="AIエージェント開発とAI駆動のワークフロー構築を中心に、現場で使えるシグナルを発信します。"
+  title="Agentic Signal | AIエージェントの実践知"
+  description="AIエージェント開発とAI駆動ワークフローの実践知を発信します。"
   hideFooter={true}
 >
   <section class="home-hero mx-auto max-w-4xl border-b pb-12 pt-6 text-center sm:pb-14" style="border-color: rgb(var(--line));">
@@ -52,7 +52,7 @@ const latestPosts = posts.slice(0, 5);
         <span aria-hidden="true">→</span>
       </a>
       <a href="/rss.xml" class="inline-link">
-        更新をRSSで受け取る
+        RSSで更新を受け取る
         <span aria-hidden="true">→</span>
       </a>
     </div>
@@ -65,13 +65,6 @@ const latestPosts = posts.slice(0, 5);
 
     <div class="mt-4 border-t" style="border-color: rgba(var(--line), 0.9);">
       {latestPosts.map((post) => <BlogCard post={post} variant="compact" />)}
-    </div>
-
-    <div class="mt-6">
-      <a href="/blog/" class="inline-link text-sm sm:text-base">
-        すべての記事を見る
-        <span aria-hidden="true">→</span>
-      </a>
     </div>
   </section>
 </BaseLayout>
