@@ -42,7 +42,7 @@ Config / Constants    astro.config.mjs (site/markdown)  /  src/consts.ts (サイ
 
 ## データ/制御フロー
 1. **執筆**: Notion で予約投稿 → `notion-sync.yml`(10分毎)が `pnpm notion:sync` を実行 → `src/content/blog/*.md` を生成・commit。手動 Markdown 追加も可。
-2. **ビルド**: `pnpm build` = `astro check`(型検査ゲート) → `astro build`(SSG: HTML/RSS/sitemap/OG PNG 生成) → `pagefind --site dist`(検索インデックス化)。
+2. **検証・ビルド**: Pull Request CI で `pnpm test` を実行後、`pnpm build` = `astro check`(型検査ゲート) → `astro build`(SSG: HTML/RSS/sitemap/OG PNG 生成) → `pagefind --site dist`(検索インデックス化)。
 3. **デプロイ**: `src/content/blog/**` への push で `deploy-content-to-cloudflare.yml` が発火 → `wrangler pages deploy ./dist`。CSP の sha256 が変わる場合は `public/_headers` を更新。
 4. **配信**: Cloudflare Pages が静的アセット + `public/_headers`(CSP/セキュリティヘッダ/キャッシュ)を配信。
 

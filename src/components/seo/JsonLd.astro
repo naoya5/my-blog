@@ -5,7 +5,7 @@ interface Props {
   schema: Record<string, unknown> | Array<Record<string, unknown>>;
 }
 
-const { schema } = Astro.props;
+const { schema } = Astro.props as Props;
 const json = JSON.stringify(schema).replace(/</g, '\\u003c');
 ---
 
