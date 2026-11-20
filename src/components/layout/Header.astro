@@ -13,6 +13,16 @@ const utilityLinks = [
 ];
 
 const activePath = Astro.url.pathname;
+
+const isNavItemActive = (href: string) => {
+  if (href === '/about/') return activePath === href;
+  if (href === '/blog/page/1/') return activePath.startsWith('/blog/page/');
+  if (href === '/blog/') {
+    return activePath === href || (/^\/blog\/[^/]+\/$/.test(activePath) && !activePath.startsWith('/blog/page/'));
+  }
+
+  return activePath === href;
+};
 ---
 
 <header id="site-header" class="glass-header">
@@ -26,7 +36,7 @@ const activePath = Astro.url.pathname;
         <ul class="flex items-center gap-2">
           {navItems.map((item) => (
             <li>
-              <a class="floating-nav-link" href={item.href} aria-current={activePath === item.href ? 'page' : undefined}>{item.label}</a>
+              <a class="floating-nav-link" href={item.href} aria-current={isNavItemActive(item.href) ? 'page' : undefined}>{item.label}</a>
             </li>
           ))}
         </ul>
@@ -107,7 +117,7 @@ const activePath = Astro.url.pathname;
             <a
               class="mobile-menu-link"
               href={item.href}
-              aria-current={activePath === item.href ? 'page' : undefined}
+              aria-current={isNavItemActive(item.href) ? 'page' : undefined}
               data-mobile-menu-navlink
             >
               {item.label}
